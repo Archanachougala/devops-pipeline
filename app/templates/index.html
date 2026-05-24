@@ -276,9 +276,9 @@
       <div class="card" style="cursor:pointer" onclick="openDockerModal()">
         <div class="card-title">Container Info <span style="font-size:.6rem;color:var(--accent);margin-left:4px">(click for full details)</span></div>
         <div id="containerQuick">
-          <div class="modal-row"><span class="modal-key">Name</span><span class="modal-val accent">{{ container["name"] }}</span></div>
-          <div class="modal-row"><span class="modal-key">Image</span><span class="modal-val">{{ container["image"] }}</span></div>
-          <div class="modal-row"><span class="modal-key">Status</span><span class="modal-val green">{{ container["status"] }}</span></div>
+          <div class="modal-row"><span class="modal-key">Name</span><span class="modal-val accent">{{ container_name }}</span></div>
+          <div class="modal-row"><span class="modal-key">Image</span><span class="modal-val">{{ container_image }}</span></div>
+          <div class="modal-row"><span class="modal-key">Status</span><span class="modal-val green">{{ container_status }}</span></div>
           <div class="modal-row"><span class="modal-key">Port</span><span class="modal-val">0.0.0.0:5000</span></div>
         </div>
       </div>
