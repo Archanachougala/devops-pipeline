@@ -1,0 +1,28 @@
+---
+- name: Deploy application
+  hosts: localhost
+  become: yes
+  vars:
+    app_version: "{{ version }}"
+    s3_bucket: "devops-pipeline-deployments-yourname"
+
+  tasks:
+    - name: Stop existing container
+      command: docker stop devops-app
+      ignore_errors: yes
+
+    - name: Remove existing container
+      command: docker rm devops-app
+      ignore_errors: yes
+
+    - name: Run new container
+      command: >
+        docker run -d
+        -p 5000:5000
+        --name devops-app
+        -e APP_VERSION={{ app_version }}
+        devops-app:{{ app_version }}
+
+    - name: Save current version to S3
+      shell: echo "{{ app_version }}" > /tmp/current_version.txt &&
+             aws s3 cp /tmp/current_version.txt s3://{{ s3_bucket }}/current_version.txt

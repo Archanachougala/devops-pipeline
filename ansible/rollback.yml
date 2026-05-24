@@ -1,0 +1,30 @@
+---
+- name: Rollback to previous version
+  hosts: localhost
+  become: yes
+  vars:
+    s3_bucket: "devops-pipeline-deployments-yourname"
+
+  tasks:
+    - name: Get previous version from S3
+      command: aws s3 cp s3://{{ s3_bucket }}/previous_version.txt /tmp/previous_version.txt
+
+    - name: Read previous version
+      command: cat /tmp/previous_version.txt
+      register: prev_version
+
+    - name: Stop broken container
+      command: docker stop devops-app
+      ignore_errors: yes
+
+    - name: Remove broken container
+      command: docker rm devops-app
+      ignore_errors: yes
+
+    - name: Redeploy previous version
+      command: >
+        docker run -d
+        -p 5000:5000
+        --name devops-app
+        -e APP_VERSION={{ prev_version.stdout }}
+        devops-app:{{ prev_version.stdout }}
