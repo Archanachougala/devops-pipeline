@@ -28,10 +28,9 @@
         echo "{{ app_version }}" > /tmp/current_version.txt
         aws s3 cp /tmp/current_version.txt s3://{{ s3_bucket }}/current_version.txt
 
-    - name: Save deployment record to S3
+    - name: Record deployment in history
       shell: |
-        sleep 10
+        sleep 12
         curl -s -X POST http://172.17.0.1:5000/record-deploy \
           -H "Content-Type: application/json" \
-          -d '{"version":"{{ app_version }}","status":"Success","message":"Deployed via Jenkins + Ansible"}'
-      ignore_errors: yes
+          -d "{\"version\":\"{{ app_version }}\",\"status\":\"Success\",\"message\":\"Deployed via Jenkins and Ansible\"}" || true
