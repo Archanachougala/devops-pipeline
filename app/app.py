@@ -12,17 +12,17 @@ def home():
     return f"""
     <html>
     <body style="font-family: Arial; text-align: center; margin-top: 100px;">
-        <h1>🚀 DevOps Pipeline Demo</h1>
+        <h1>DevOps Pipeline with Automated Rollback</h1>
         <h2>Version: {VERSION}</h2>
         <p>Environment: {ENV_NAME}</p>
-        <p>Last deployed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+        <p>Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
     </body>
     </html>
     """
 
 @app.route('/health')
 def health():
-    return jsonify({{'status': 'ok', 'version': VERSION}}), 200
+    return jsonify({"status": "ok", "version": VERSION}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
