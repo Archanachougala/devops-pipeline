@@ -22,7 +22,7 @@ def home():
 
 @app.route('/health')
 def health():
-    raise Exception("Intentional crash for rollback demo")
+    return jsonify({"status": "ok", "version": VERSION}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
