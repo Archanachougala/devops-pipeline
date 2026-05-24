@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevOps Pipeline — Live Status</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080c12;
+      --surface: #0d1520;
+      --surface2: #111c2d;
+      --border: #1a2d45;
+      --accent: #00d4ff;
+      --accent2: #00ff88;
+      --accent3: #ff6b35;
+      --warn: #ffb800;
+      --danger: #ff3b5c;
+      --text: #e2eeff;
+      --text2: #7a9bbf;
+      --text3: #3d5a7a;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Syne', sans-serif;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .container { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:2rem 1.5rem; }
+    .header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border); }
+    .header-left h1 { font-family:var(--sans); font-size:1.8rem; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.02em; margin-bottom:0.3rem; }
+    .header-left p { font-size:0.75rem; color:var(--text3); letter-spacing:0.15em; text-transform:uppercase; }
+    .header-right { display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem; }
+    .live-badge { display:flex; align-items:center; gap:6px; background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2); border-radius:20px; padding:4px 12px; font-size:0.7rem; color:var(--accent2); letter-spacing:0.1em; text-transform:uppercase; }
+    .live-dot { width:6px; height:6px; background:var(--accent2); border-radius:50%; animation:blink 1.5s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1;box-shadow:0 0 6px var(--accent2)} 50%{opacity:0.3;box-shadow:none} }
+    .timestamp { font-size:0.7rem; color:var(--text3); }
+    .hero { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:1rem; margin-bottom:1.5rem; animation:fadeUp 0.5s ease both; }
+    .hero-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.25rem; position:relative; overflow:hidden; transition:border-color 0.2s,transform 0.2s; }
+    .hero-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+    .hero-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--accent),transparent); }
+    .hero-card.green::before { background:linear-gradient(90deg,var(--accent2),transparent); }
+    .hero-card.orange::before { background:linear-gradient(90deg,var(--accent3),transparent); }
+    .hero-card.warn::before { background:linear-gradient(90deg,var(--warn),transparent); }
+    .hero-label { font-size:0.65rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:0.5rem; }
+    .hero-value { font-family:var(--sans); font-size:1.3rem; font-weight:700; color:var(--text); }
+    .hero-sub { font-size:0.7rem; color:var(--text2); margin-top:0.25rem; }
+    .grid { display:grid; grid-template-columns:2fr 1fr; gap:1.5rem; margin-bottom:1.5rem; animation:fadeUp 0.5s 0.1s ease both; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.5rem; }
+    .card-title { font-size:0.65rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:1.25rem; display:flex; align-items:center; gap:8px; }
+    .card-title::after { content:''; flex:1; height:1px; background:var(--border); }
+    .pipeline { display:flex; align-items:center; margin-bottom:1.5rem; }
+    .stage { flex:1; text-align:center; position:relative; }
+    .stage:not(:last-child)::after { content:''; position:absolute; top:22px; height:2px; background:var(--border); left:50%; width:calc(100% - 44px); transform:translateX(22px); }
+    .stage:not(:last-child).done::after { background:linear-gradient(90deg,var(--accent2),var(--border)); }
+    .stage-icon { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 0.5rem; font-size:1.1rem; border:2px solid var(--border); background:var(--surface2); position:relative; z-index:1; transition:all 0.3s; }
+    .stage.done .stage-icon { border-color:var(--accent2); background:rgba(0,255,136,0.08); box-shadow:0 0 15px rgba(0,255,136,0.2); }
+    .stage.fail .stage-icon { border-color:var(--danger); background:rgba(255,59,92,0.08); box-shadow:0 0 15px rgba(255,59,92,0.2); }
+    .stage-name { font-size:0.65rem; color:var(--text2); text-transform:uppercase; letter-spacing:0.08em; }
+    .stage.done .stage-name { color:var(--accent2); }
+    .stage.fail .stage-name { color:var(--danger); }
+    .status-list { display:flex; flex-direction:column; gap:0.75rem; }
+    .status-item { display:flex; align-items:center; justify-content:space-between; padding:0.75rem 1rem; background:var(--surface2); border-radius:8px; border:1px solid var(--border); transition:border-color 0.2s; }
+    .status-item:hover { border-color:var(--accent); }
+    .status-left { display:flex; align-items:center; gap:10px; }
+    .status-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .status-dot.green { background:var(--accent2); box-shadow:0 0 8px var(--accent2); }
+    .status-dot.red { background:var(--danger); box-shadow:0 0 8px var(--danger); }
+    .status-dot.blue { background:var(--accent); box-shadow:0 0 8px var(--accent); animation:blink 2s infinite; }
+    .status-dot.yellow { background:var(--warn); box-shadow:0 0 8px var(--warn); }
+    .status-name { font-size:0.8rem; color:var(--text); }
+    .status-badge { font-size:0.65rem; padding:2px 8px; border-radius:4px; font-weight:500; letter-spacing:0.05em; }
+    .status-badge.green { background:rgba(0,255,136,0.1); color:var(--accent2); border:1px solid rgba(0,255,136,0.2); }
+    .status-badge.red { background:rgba(255,59,92,0.1); color:var(--danger); border:1px solid rgba(255,59,92,0.2); }
+    .status-badge.blue { background:rgba(0,212,255,0.1); color:var(--accent); border:1px solid rgba(0,212,255,0.2); }
+    .status-badge.yellow { background:rgba(255,184,0,0.1); color:var(--warn); border:1px solid rgba(255,184,0,0.2); }
+    .metric { margin-bottom:1rem; }
+    .metric:last-child { margin-bottom:0; }
+    .metric-header { display:flex; justify-content:space-between; margin-bottom:0.4rem; }
+    .metric-label { font-size:0.72rem; color:var(--text2); }
+    .metric-value { font-size:0.72rem; color:var(--text); font-weight:600; }
+    .bar-track { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; }
+    .bar-fill { height:100%; border-radius:3px; transition:width 1s ease; }
+    .bar-fill.cpu { background:linear-gradient(90deg,var(--accent),#0099ff); }
+    .bar-fill.mem { background:linear-gradient(90deg,var(--accent2),#00cc6a); }
+    .bar-fill.disk { background:linear-gradient(90deg,var(--accent3),#ff9f00); }
+    .history-list { display:flex; flex-direction:column; gap:0.5rem; }
+    .history-item { display:grid; grid-template-columns:60px 1fr auto auto; align-items:center; gap:1rem; padding:0.75rem 1rem; background:var(--surface2); border-radius:8px; border:1px solid var(--border); font-size:0.75rem; transition:border-color 0.2s; }
+    .history-item:hover { border-color:var(--accent); }
+    .history-version { font-weight:600; color:var(--accent); }
+    .history-status { font-size:0.65rem; padding:2px 8px; border-radius:4px; }
+    .history-status.success { background:rgba(0,255,136,0.1); color:var(--accent2); }
+    .history-status.rollback { background:rgba(255,184,0,0.1); color:var(--warn); }
+    .history-status.failed { background:rgba(255,59,92,0.1); color:var(--danger); }
+    .history-time { color:var(--text3); font-size:0.65rem; white-space:nowrap; }
+    .docker-info { display:flex; flex-direction:column; gap:0.5rem; }
+    .docker-row { display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid var(--border); font-size:0.75rem; }
+    .docker-row:last-child { border-bottom:none; }
+    .docker-key { color:var(--text2); }
+    .docker-val { color:var(--text); font-weight:500; }
+    .docker-val.accent { color:var(--accent); }
+    .docker-val.green { color:var(--accent2); }
+    .footer { margin-top:2rem; padding-top:1rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-size:0.65rem; color:var(--text3); letter-spacing:0.08em; }
+    .footer-tools { display:flex; gap:1rem; }
+    .tool-tag { padding:2px 8px; border-radius:4px; background:var(--surface2); border:1px solid var(--border); color:var(--text2); }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .grid { animation:fadeUp 0.5s 0.1s ease both; }
+    @media(max-width:768px) { .hero{grid-template-columns:1fr 1fr} .grid{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-left">
+      <h1>DevOps Pipeline</h1>
+      <p>Live Infrastructure Status Dashboard</p>
+    </div>
+    <div class="header-right">
+      <div class="live-badge"><div class="live-dot"></div>Live</div>
+      <div class="timestamp">{{ current_time }}</div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-card green">
+      <div class="hero-label">App Version</div>
+      <div class="hero-value">{{ version }}</div>
+      <div class="hero-sub">{{ environment }}</div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-label">Uptime</div>
+      <div class="hero-value">{{ uptime }}</div>
+      <div class="hero-sub">Since last deploy</div>
+    </div>
+    <div class="hero-card orange">
+      <div class="hero-label">Host</div>
+      <div class="hero-value" style="font-size:1rem;">{{ hostname }}</div>
+      <div class="hero-sub">{{ host_ip }}</div>
+    </div>
+    <div class="hero-card warn">
+      <div class="hero-label">Total Deployments</div>
+      <div class="hero-value">{{ total_deploys }}</div>
+      <div class="hero-sub">{{ successful_deploys }} successful</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div style="display:flex;flex-direction:column;gap:1.5rem;">
+
+      <div class="card">
+        <div class="card-title">Pipeline Stages</div>
+        <div class="pipeline">
+          <div class="stage done">
+            <div class="stage-icon">⬆</div>
+            <div class="stage-name">Git Push</div>
+          </div>
+          <div class="stage done">
+            <div class="stage-icon">⚙</div>
+            <div class="stage-name">Jenkins</div>
+          </div>
+          <div class="stage done">
+            <div class="stage-icon">🐳</div>
+            <div class="stage-name">Docker</div>
+          </div>
+          <div class="stage done">
+            <div class="stage-icon">📦</div>
+            <div class="stage-name">Ansible</div>
+          </div>
+          <div class="stage {{ health_stage_class }}">
+            <div class="stage-icon">{{ health_stage_icon }}</div>
+            <div class="stage-name">Health</div>
+          </div>
+        </div>
+
+        <div class="status-list">
+          <div class="status-item">
+            <div class="status-left">
+              <div class="status-dot {{ docker_dot }}"></div>
+              <div class="status-name">Docker</div>
+            </div>
+            <span class="status-badge {{ docker_badge_class }}">{{ docker_status }}</span>
+          </div>
+          <div class="status-item">
+            <div class="status-left">
+              <div class="status-dot {{ ansible_dot }}"></div>
+              <div class="status-name">Ansible</div>
+            </div>
+            <span class="status-badge {{ ansible_badge_class }}">{{ ansible_status }}</span>
+          </div>
+          <div class="status-item">
+            <div class="status-left">
+              <div class="status-dot {{ jenkins_dot }}"></div>
+              <div class="status-name">Jenkins</div>
+            </div>
+            <span class="status-badge {{ jenkins_badge_class }}">{{ jenkins_status }}</span>
+          </div>
+          <div class="status-item">
+            <div class="status-left">
+              <div class="status-dot {{ health_dot }}"></div>
+              <div class="status-name">Health Check</div>
+            </div>
+            <span class="status-badge {{ health_badge_class }}">{{ health_status }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Deployment History</div>
+        <div class="history-list">
+          {% for deploy in deployment_history %}
+          <div class="history-item">
+            <span class="history-version">{{ deploy.version }}</span>
+            <span style="color:var(--text2);font-size:0.72rem;">{{ deploy.message }}</span>
+            <span class="history-status {{ deploy.status_class }}">{{ deploy.status }}</span>
+            <span class="history-time">{{ deploy.time }}</span>
+          </div>
+          {% endfor %}
+          {% if not deployment_history %}
+          <div style="text-align:center;color:var(--text3);font-size:0.75rem;padding:1rem;">
+            No deployment history yet
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:1.5rem;">
+
+      <div class="card">
+        <div class="card-title">System Metrics</div>
+        <div class="metric">
+          <div class="metric-header">
+            <span class="metric-label">CPU Usage</span>
+            <span class="metric-value">{{ cpu_percent }}%</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill cpu" style="width:{{ cpu_percent }}%"></div></div>
+        </div>
+        <div class="metric">
+          <div class="metric-header">
+            <span class="metric-label">Memory Usage</span>
+            <span class="metric-value">{{ mem_percent }}%</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill mem" style="width:{{ mem_percent }}%"></div></div>
+        </div>
+        <div class="metric">
+          <div class="metric-header">
+            <span class="metric-label">Disk Usage</span>
+            <span class="metric-value">{{ disk_percent }}%</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill disk" style="width:{{ disk_percent }}%"></div></div>
+        </div>
+        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
+          <div class="docker-row">
+            <span class="docker-key">Total RAM</span>
+            <span class="docker-val">{{ total_ram }}</span>
+          </div>
+          <div class="docker-row">
+            <span class="docker-key">Used RAM</span>
+            <span class="docker-val accent">{{ used_ram }}</span>
+          </div>
+          <div class="docker-row">
+            <span class="docker-key">Free RAM</span>
+            <span class="docker-val green">{{ free_ram }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Container Info</div>
+        <div class="docker-info">
+          <div class="docker-row">
+            <span class="docker-key">Container</span>
+            <span class="docker-val accent">{{ container_name }}</span>
+          </div>
+          <div class="docker-row">
+            <span class="docker-key">Image</span>
+            <span class="docker-val">{{ container_image }}</span>
+          </div>
+          <div class="docker-row">
+            <span class="docker-key">Status</span>
+            <span class="docker-val green">{{ container_status }}</span>
+          </div>
+          <div class="docker-row">
+            <span class="docker-key">Port</span>
+            <span class="docker-val">0.0.0.0:5000</span>
+          </div>
+          <div class="docker-row">
+            <span class="docker-key">Restart Policy</span>
+            <span class="docker-val">always</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>DevOps Pipeline — Automated Rollback System</div>
+    <div class="footer-tools">
+      <span class="tool-tag">Jenkins</span>
+      <span class="tool-tag">Docker</span>
+      <span class="tool-tag">Ansible</span>
+      <span class="tool-tag">AWS EC2</span>
+      <span class="tool-tag">S3</span>
+    </div>
+  </div>
+
+</div>
+<script>
+  setTimeout(() => location.reload(), 30000);
+  window.addEventListener('load', () => {
+    document.querySelectorAll('.bar-fill').forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => { bar.style.width = w; }, 100);
+    });
+  });
+</script>
+</body>
+</html>

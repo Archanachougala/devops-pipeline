@@ -16,8 +16,11 @@
       shell: |
         docker run -d \
           -p 5000:5000 \
+          -v /var/run/docker.sock:/var/run/docker.sock \
           --name devops-app \
           -e APP_VERSION={{ app_version }} \
+          -e ENV_NAME=production \
+          -e S3_BUCKET={{ s3_bucket }} \
           devops-app:{{ app_version }}
 
     - name: Save current version to S3
@@ -25,3 +28,10 @@
         echo "{{ app_version }}" > /tmp/current_version.txt
         aws s3 cp /tmp/current_version.txt s3://{{ s3_bucket }}/current_version.txt
 
+    - name: Save deployment record to S3
+      shell: |
+        sleep 10
+        curl -s -X POST http://172.17.0.1:5000/record-deploy \
+          -H "Content-Type: application/json" \
+          -d '{"version":"{{ app_version }}","status":"Success","message":"Deployed via Jenkins + Ansible"}'
+      ignore_errors: yes
