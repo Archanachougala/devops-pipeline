@@ -7,331 +7,370 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #080c12;
-      --surface: #0d1520;
-      --surface2: #111c2d;
-      --border: #1a2d45;
-      --accent: #00d4ff;
-      --accent2: #00ff88;
-      --accent3: #ff6b35;
-      --warn: #ffb800;
-      --danger: #ff3b5c;
-      --text: #e2eeff;
-      --text2: #7a9bbf;
-      --text3: #3d5a7a;
-      --mono: 'JetBrains Mono', monospace;
-      --sans: 'Syne', sans-serif;
+      --bg:#080c12; --surface:#0d1520; --surface2:#111c2d; --border:#1a2d45;
+      --accent:#00d4ff; --green:#00ff88; --orange:#ff6b35; --warn:#ffb800;
+      --danger:#ff3b5c; --text:#e2eeff; --text2:#7a9bbf; --text3:#3d5a7a;
+      --mono:'JetBrains Mono',monospace; --sans:'Syne',sans-serif;
     }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--mono);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .container { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:2rem 1.5rem; }
-    .header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border); }
-    .header-left h1 { font-family:var(--sans); font-size:1.8rem; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.02em; margin-bottom:0.3rem; }
-    .header-left p { font-size:0.75rem; color:var(--text3); letter-spacing:0.15em; text-transform:uppercase; }
-    .header-right { display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem; }
-    .live-badge { display:flex; align-items:center; gap:6px; background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2); border-radius:20px; padding:4px 12px; font-size:0.7rem; color:var(--accent2); letter-spacing:0.1em; text-transform:uppercase; }
-    .live-dot { width:6px; height:6px; background:var(--accent2); border-radius:50%; animation:blink 1.5s ease-in-out infinite; }
-    @keyframes blink { 0%,100%{opacity:1;box-shadow:0 0 6px var(--accent2)} 50%{opacity:0.3;box-shadow:none} }
-    .timestamp { font-size:0.7rem; color:var(--text3); }
-    .hero { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:1rem; margin-bottom:1.5rem; animation:fadeUp 0.5s ease both; }
-    .hero-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.25rem; position:relative; overflow:hidden; transition:border-color 0.2s,transform 0.2s; }
-    .hero-card:hover { border-color:var(--accent); transform:translateY(-2px); }
-    .hero-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--accent),transparent); }
-    .hero-card.green::before { background:linear-gradient(90deg,var(--accent2),transparent); }
-    .hero-card.orange::before { background:linear-gradient(90deg,var(--accent3),transparent); }
-    .hero-card.warn::before { background:linear-gradient(90deg,var(--warn),transparent); }
-    .hero-label { font-size:0.65rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:0.5rem; }
-    .hero-value { font-family:var(--sans); font-size:1.3rem; font-weight:700; color:var(--text); }
-    .hero-sub { font-size:0.7rem; color:var(--text2); margin-top:0.25rem; }
-    .grid { display:grid; grid-template-columns:2fr 1fr; gap:1.5rem; margin-bottom:1.5rem; animation:fadeUp 0.5s 0.1s ease both; }
-    .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.5rem; }
-    .card-title { font-size:0.65rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:1.25rem; display:flex; align-items:center; gap:8px; }
-    .card-title::after { content:''; flex:1; height:1px; background:var(--border); }
-    .pipeline { display:flex; align-items:center; margin-bottom:1.5rem; }
-    .stage { flex:1; text-align:center; position:relative; }
-    .stage:not(:last-child)::after { content:''; position:absolute; top:22px; height:2px; background:var(--border); left:50%; width:calc(100% - 44px); transform:translateX(22px); }
-    .stage:not(:last-child).done::after { background:linear-gradient(90deg,var(--accent2),var(--border)); }
-    .stage-icon { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 0.5rem; font-size:1.1rem; border:2px solid var(--border); background:var(--surface2); position:relative; z-index:1; transition:all 0.3s; }
-    .stage.done .stage-icon { border-color:var(--accent2); background:rgba(0,255,136,0.08); box-shadow:0 0 15px rgba(0,255,136,0.2); }
-    .stage.fail .stage-icon { border-color:var(--danger); background:rgba(255,59,92,0.08); box-shadow:0 0 15px rgba(255,59,92,0.2); }
-    .stage-name { font-size:0.65rem; color:var(--text2); text-transform:uppercase; letter-spacing:0.08em; }
-    .stage.done .stage-name { color:var(--accent2); }
-    .stage.fail .stage-name { color:var(--danger); }
-    .status-list { display:flex; flex-direction:column; gap:0.75rem; }
-    .status-item { display:flex; align-items:center; justify-content:space-between; padding:0.75rem 1rem; background:var(--surface2); border-radius:8px; border:1px solid var(--border); transition:border-color 0.2s; }
-    .status-item:hover { border-color:var(--accent); }
-    .status-left { display:flex; align-items:center; gap:10px; }
-    .status-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-    .status-dot.green { background:var(--accent2); box-shadow:0 0 8px var(--accent2); }
-    .status-dot.red { background:var(--danger); box-shadow:0 0 8px var(--danger); }
-    .status-dot.blue { background:var(--accent); box-shadow:0 0 8px var(--accent); animation:blink 2s infinite; }
-    .status-dot.yellow { background:var(--warn); box-shadow:0 0 8px var(--warn); }
-    .status-name { font-size:0.8rem; color:var(--text); }
-    .status-badge { font-size:0.65rem; padding:2px 8px; border-radius:4px; font-weight:500; letter-spacing:0.05em; }
-    .status-badge.green { background:rgba(0,255,136,0.1); color:var(--accent2); border:1px solid rgba(0,255,136,0.2); }
-    .status-badge.red { background:rgba(255,59,92,0.1); color:var(--danger); border:1px solid rgba(255,59,92,0.2); }
-    .status-badge.blue { background:rgba(0,212,255,0.1); color:var(--accent); border:1px solid rgba(0,212,255,0.2); }
-    .status-badge.yellow { background:rgba(255,184,0,0.1); color:var(--warn); border:1px solid rgba(255,184,0,0.2); }
-    .metric { margin-bottom:1rem; }
-    .metric:last-child { margin-bottom:0; }
-    .metric-header { display:flex; justify-content:space-between; margin-bottom:0.4rem; }
-    .metric-label { font-size:0.72rem; color:var(--text2); }
-    .metric-value { font-size:0.72rem; color:var(--text); font-weight:600; }
-    .bar-track { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; }
-    .bar-fill { height:100%; border-radius:3px; transition:width 1s ease; }
-    .bar-fill.cpu { background:linear-gradient(90deg,var(--accent),#0099ff); }
-    .bar-fill.mem { background:linear-gradient(90deg,var(--accent2),#00cc6a); }
-    .bar-fill.disk { background:linear-gradient(90deg,var(--accent3),#ff9f00); }
-    .history-list { display:flex; flex-direction:column; gap:0.5rem; }
-    .history-item { display:grid; grid-template-columns:60px 1fr auto auto; align-items:center; gap:1rem; padding:0.75rem 1rem; background:var(--surface2); border-radius:8px; border:1px solid var(--border); font-size:0.75rem; transition:border-color 0.2s; }
-    .history-item:hover { border-color:var(--accent); }
-    .history-version { font-weight:600; color:var(--accent); }
-    .history-status { font-size:0.65rem; padding:2px 8px; border-radius:4px; }
-    .history-status.success { background:rgba(0,255,136,0.1); color:var(--accent2); }
-    .history-status.rollback { background:rgba(255,184,0,0.1); color:var(--warn); }
-    .history-status.failed { background:rgba(255,59,92,0.1); color:var(--danger); }
-    .history-time { color:var(--text3); font-size:0.65rem; white-space:nowrap; }
-    .docker-info { display:flex; flex-direction:column; gap:0.5rem; }
-    .docker-row { display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid var(--border); font-size:0.75rem; }
-    .docker-row:last-child { border-bottom:none; }
-    .docker-key { color:var(--text2); }
-    .docker-val { color:var(--text); font-weight:500; }
-    .docker-val.accent { color:var(--accent); }
-    .docker-val.green { color:var(--accent2); }
-    .footer { margin-top:2rem; padding-top:1rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-size:0.65rem; color:var(--text3); letter-spacing:0.08em; }
-    .footer-tools { display:flex; gap:1rem; }
-    .tool-tag { padding:2px 8px; border-radius:4px; background:var(--surface2); border:1px solid var(--border); color:var(--text2); }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-    .grid { animation:fadeUp 0.5s 0.1s ease both; }
-    @media(max-width:768px) { .hero{grid-template-columns:1fr 1fr} .grid{grid-template-columns:1fr} }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;overflow-x:hidden;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+    .wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:2rem 1.5rem;}
+
+    /* HEADER */
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);}
+    .logo{font-family:var(--sans);font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .logo-sub{font-size:.72rem;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;margin-top:4px;}
+    .header-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+    .live-badge{display:flex;align-items:center;gap:6px;background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);border-radius:20px;padding:4px 12px;font-size:.7rem;color:var(--green);letter-spacing:.1em;text-transform:uppercase;}
+    .live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 1.5s infinite;}
+    @keyframes blink{0%,100%{opacity:1;box-shadow:0 0 6px var(--green)}50%{opacity:.3;box-shadow:none}}
+    .ts{font-size:.7rem;color:var(--text3);}
+
+    /* HERO */
+    .hero{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;}
+    .hc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;animation:fadeUp .5s ease both;}
+    .hc:hover{border-color:var(--accent);transform:translateY(-2px);}
+    .hc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+    .hc.c1::before{background:linear-gradient(90deg,var(--green),transparent);}
+    .hc.c2::before{background:linear-gradient(90deg,var(--accent),transparent);}
+    .hc.c3::before{background:linear-gradient(90deg,var(--orange),transparent);}
+    .hc.c4::before{background:linear-gradient(90deg,var(--warn),transparent);}
+    .hc-lbl{font-size:.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.5rem;}
+    .hc-val{font-family:var(--sans);font-size:1.3rem;font-weight:700;}
+    .hc-sub{font-size:.7rem;color:var(--text2);margin-top:.25rem;}
+
+    /* MAIN GRID */
+    .grid{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
+    .col{display:flex;flex-direction:column;gap:1.5rem;}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;}
+    .card-title{font-size:.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;}
+    .card-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+    /* PIPELINE */
+    .pipeline{display:flex;align-items:center;margin-bottom:1.5rem;}
+    .stage{flex:1;text-align:center;position:relative;}
+    .stage:not(:last-child)::after{content:'';position:absolute;top:22px;height:2px;background:var(--border);left:50%;width:calc(100% - 44px);transform:translateX(22px);}
+    .stage.done:not(:last-child)::after{background:linear-gradient(90deg,var(--green),var(--border));}
+    .stage-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .5rem;font-size:1.1rem;border:2px solid var(--border);background:var(--surface2);position:relative;z-index:1;transition:all .3s;}
+    .stage.done .stage-icon{border-color:var(--green);background:rgba(0,255,136,.08);box-shadow:0 0 15px rgba(0,255,136,.2);}
+    .stage.fail .stage-icon{border-color:var(--danger);background:rgba(255,59,92,.08);}
+    .stage-name{font-size:.65rem;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;}
+    .stage.done .stage-name{color:var(--green);}
+    .stage.fail .stage-name{color:var(--danger);}
+
+    /* STATUS LIST */
+    .status-list{display:flex;flex-direction:column;gap:.75rem;}
+    .status-item{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border);transition:border-color .2s,transform .2s;cursor:pointer;}
+    .status-item:hover{border-color:var(--accent);transform:translateX(2px);}
+    .status-left{display:flex;align-items:center;gap:10px;}
+    .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .dot.green{background:var(--green);box-shadow:0 0 8px var(--green);}
+    .dot.red{background:var(--danger);box-shadow:0 0 8px var(--danger);}
+    .dot.blue{background:var(--accent);box-shadow:0 0 8px var(--accent);animation:blink 2s infinite;}
+    .dot.yellow{background:var(--warn);}
+    .sname{font-size:.8rem;}
+    .badge{font-size:.65rem;padding:2px 8px;border-radius:4px;font-weight:500;letter-spacing:.05em;}
+    .badge.green{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.2);}
+    .badge.red{background:rgba(255,59,92,.1);color:var(--danger);border:1px solid rgba(255,59,92,.2);}
+    .badge.blue{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2);}
+    .badge.yellow{background:rgba(255,184,0,.1);color:var(--warn);border:1px solid rgba(255,184,0,.2);}
+
+    /* METRICS */
+    .metric{margin-bottom:1rem;}
+    .metric:last-child{margin-bottom:0;}
+    .metric-header{display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:.72rem;}
+    .metric-lbl{color:var(--text2);}
+    .metric-val{color:var(--text);font-weight:600;}
+    .bar-track{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+    .bar-fill{height:100%;border-radius:3px;transition:width 1.2s ease;}
+    .bar-cpu{background:linear-gradient(90deg,var(--accent),#0099ff);}
+    .bar-mem{background:linear-gradient(90deg,var(--green),#00cc6a);}
+    .bar-disk{background:linear-gradient(90deg,var(--orange),#ff9f00);}
+    .ram-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);}
+    .ram-item{background:var(--surface2);border-radius:8px;padding:.6rem;text-align:center;}
+    .ram-lbl{font-size:.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+    .ram-val{font-size:.8rem;font-weight:600;color:var(--text);}
+
+    /* HISTORY */
+    .history-item{display:grid;grid-template-columns:55px 1fr auto auto;align-items:center;gap:.75rem;padding:.7rem .9rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border);font-size:.72rem;margin-bottom:.5rem;transition:border-color .2s;}
+    .history-item:hover{border-color:var(--accent);}
+    .history-item:last-child{margin-bottom:0;}
+    .hv{font-weight:600;color:var(--accent);}
+    .hs{font-size:.65rem;padding:2px 8px;border-radius:4px;}
+    .hs.success{background:rgba(0,255,136,.1);color:var(--green);}
+    .hs.rollback{background:rgba(255,184,0,.1);color:var(--warn);}
+    .hs.failed{background:rgba(255,59,92,.1);color:var(--danger);}
+    .ht{color:var(--text3);font-size:.65rem;white-space:nowrap;}
+
+    /* FOOTER */
+    .footer{margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:.65rem;color:var(--text3);}
+    .tags{display:flex;gap:.5rem;}
+    .tag{padding:2px 8px;border-radius:4px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);}
+
+    /* MODAL */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;width:500px;max-width:90vw;animation:modalIn .2s ease;}
+    @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;}
+    .modal-title{font-family:var(--sans);font-size:1.1rem;font-weight:700;color:var(--text);}
+    .modal-close{background:none;border:none;color:var(--text3);font-size:1.2rem;cursor:pointer;padding:4px 8px;border-radius:4px;}
+    .modal-close:hover{color:var(--text);background:var(--surface2);}
+    .modal-row{display:flex;justify-content:space-between;align-items:center;padding:.7rem 0;border-bottom:1px solid var(--border);font-size:.8rem;}
+    .modal-row:last-child{border-bottom:none;}
+    .modal-key{color:var(--text2);}
+    .modal-val{color:var(--text);font-weight:500;text-align:right;word-break:break-all;max-width:280px;}
+    .modal-val.green{color:var(--green);}
+    .modal-val.accent{color:var(--accent);}
+    .modal-loading{text-align:center;padding:2rem;color:var(--text2);}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .hc:nth-child(1){animation-delay:.05s}
+    .hc:nth-child(2){animation-delay:.1s}
+    .hc:nth-child(3){animation-delay:.15s}
+    .hc:nth-child(4){animation-delay:.2s}
+    @media(max-width:768px){.hero{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-<div class="container">
+<div class="wrap">
 
+  <!-- HEADER -->
   <div class="header">
-    <div class="header-left">
-      <h1>DevOps Pipeline</h1>
-      <p>Live Infrastructure Status Dashboard</p>
+    <div>
+      <div class="logo">DevOps Pipeline</div>
+      <div class="logo-sub">Live Infrastructure Status Dashboard</div>
     </div>
     <div class="header-right">
       <div class="live-badge"><div class="live-dot"></div>Live</div>
-      <div class="timestamp">{{ current_time }}</div>
+      <div class="ts" id="clock">{{ current_time }}</div>
     </div>
   </div>
 
+  <!-- HERO CARDS -->
   <div class="hero">
-    <div class="hero-card green">
-      <div class="hero-label">App Version</div>
-      <div class="hero-value">{{ version }}</div>
-      <div class="hero-sub">{{ environment }}</div>
+    <div class="hc c1">
+      <div class="hc-lbl">App Version</div>
+      <div class="hc-val">{{ version }}</div>
+      <div class="hc-sub">{{ environment }}</div>
     </div>
-    <div class="hero-card">
-      <div class="hero-label">Uptime</div>
-      <div class="hero-value">{{ uptime }}</div>
-      <div class="hero-sub">Since last deploy</div>
+    <div class="hc c2">
+      <div class="hc-lbl">Uptime</div>
+      <div class="hc-val">{{ uptime }}</div>
+      <div class="hc-sub">Since last deploy</div>
     </div>
-    <div class="hero-card orange">
-      <div class="hero-label">Host</div>
-      <div class="hero-value" style="font-size:1rem;">{{ hostname }}</div>
-      <div class="hero-sub">{{ host_ip }}</div>
+    <div class="hc c3">
+      <div class="hc-lbl">Host</div>
+      <div class="hc-val" style="font-size:1rem">{{ hostname }}</div>
+      <div class="hc-sub">{{ host_ip }}</div>
     </div>
-    <div class="hero-card warn">
-      <div class="hero-label">Total Deployments</div>
-      <div class="hero-value">{{ total_deploys }}</div>
-      <div class="hero-sub">{{ successful_deploys }} successful</div>
+    <div class="hc c4">
+      <div class="hc-lbl">Deployments</div>
+      <div class="hc-val">{{ total_deploys }}</div>
+      <div class="hc-sub">{{ successful_deploys }} successful</div>
     </div>
   </div>
 
+  <!-- MAIN GRID -->
   <div class="grid">
-    <div style="display:flex;flex-direction:column;gap:1.5rem;">
+    <div class="col">
 
+      <!-- Pipeline + status -->
       <div class="card">
-        <div class="card-title">Pipeline Stages</div>
+        <div class="card-title">CI/CD Pipeline</div>
         <div class="pipeline">
-          <div class="stage done">
-            <div class="stage-icon">⬆</div>
-            <div class="stage-name">Git Push</div>
-          </div>
-          <div class="stage done">
-            <div class="stage-icon">⚙</div>
-            <div class="stage-name">Jenkins</div>
-          </div>
-          <div class="stage done">
-            <div class="stage-icon">🐳</div>
-            <div class="stage-name">Docker</div>
-          </div>
-          <div class="stage done">
-            <div class="stage-icon">📦</div>
-            <div class="stage-name">Ansible</div>
-          </div>
-          <div class="stage {{ health_stage_class }}">
-            <div class="stage-icon">{{ health_stage_icon }}</div>
-            <div class="stage-name">Health</div>
-          </div>
+          <div class="stage done"><div class="stage-icon">⬆</div><div class="stage-name">Git Push</div></div>
+          <div class="stage done"><div class="stage-icon">⚙</div><div class="stage-name">Jenkins</div></div>
+          <div class="stage done"><div class="stage-icon">🐳</div><div class="stage-name">Docker</div></div>
+          <div class="stage done"><div class="stage-icon">📦</div><div class="stage-name">Ansible</div></div>
+          <div class="stage {{ health_stage_class }}"><div class="stage-icon">{{ health_stage_icon }}</div><div class="stage-name">Health</div></div>
         </div>
 
         <div class="status-list">
-          <div class="status-item">
+          <!-- Docker — clickable -->
+          <div class="status-item" onclick="openDockerModal()" title="Click to see container details">
             <div class="status-left">
-              <div class="status-dot {{ docker_dot }}"></div>
-              <div class="status-name">Docker</div>
+              <div class="dot {{ docker_dot }}"></div>
+              <div class="sname">🐳 Docker Container <span style="font-size:.6rem;color:var(--text3)">(click for details)</span></div>
             </div>
-            <span class="status-badge {{ docker_badge_class }}">{{ docker_status }}</span>
+            <span class="badge {{ docker_badge_class }}">{{ docker_status }}</span>
           </div>
-          <div class="status-item">
+          <div class="status-item" onclick="alert('Ansible last ran: deploy.yml\nTasks: 4 passed, 0 failed\nTarget: localhost')">
             <div class="status-left">
-              <div class="status-dot {{ ansible_dot }}"></div>
-              <div class="status-name">Ansible</div>
+              <div class="dot {{ ansible_dot }}"></div>
+              <div class="sname">⚙ Ansible Playbook</div>
             </div>
-            <span class="status-badge {{ ansible_badge_class }}">{{ ansible_status }}</span>
+            <span class="badge {{ ansible_badge_class }}">{{ ansible_status }}</span>
           </div>
-          <div class="status-item">
+          <div class="status-item" onclick="alert('Jenkins is running on port 8080\nVersion: LTS\nContainer: jenkins/jenkins:lts')">
             <div class="status-left">
-              <div class="status-dot {{ jenkins_dot }}"></div>
-              <div class="status-name">Jenkins</div>
+              <div class="dot {{ jenkins_dot }}"></div>
+              <div class="sname">🔧 Jenkins CI/CD</div>
             </div>
-            <span class="status-badge {{ jenkins_badge_class }}">{{ jenkins_status }}</span>
+            <span class="badge {{ jenkins_badge_class }}">{{ jenkins_status }}</span>
           </div>
-          <div class="status-item">
+          <div class="status-item" onclick="fetch('/health').then(r=>r.json()).then(d=>alert('Health endpoint: /health\nStatus: '+d.status+'\nVersion: '+d.version))">
             <div class="status-left">
-              <div class="status-dot {{ health_dot }}"></div>
-              <div class="status-name">Health Check</div>
+              <div class="dot {{ health_dot }}"></div>
+              <div class="sname">❤ Health Check</div>
             </div>
-            <span class="status-badge {{ health_badge_class }}">{{ health_status }}</span>
+            <span class="badge {{ health_badge_class }}">{{ health_status }}</span>
           </div>
         </div>
       </div>
 
+      <!-- History -->
       <div class="card">
         <div class="card-title">Deployment History</div>
-        <div class="history-list">
-          {% for deploy in deployment_history %}
-          <div class="history-item">
-            <span class="history-version">{{ deploy.version }}</span>
-            <span style="color:var(--text2);font-size:0.72rem;">{{ deploy.message }}</span>
-            <span class="history-status {{ deploy.status_class }}">{{ deploy.status }}</span>
-            <span class="history-time">{{ deploy.time }}</span>
-          </div>
-          {% endfor %}
-          {% if not deployment_history %}
-          <div style="text-align:center;color:var(--text3);font-size:0.75rem;padding:1rem;">
-            No deployment history yet
-          </div>
-          {% endif %}
+        {% for d in deployment_history %}
+        <div class="history-item">
+          <span class="hv">{{ d.version }}</span>
+          <span style="color:var(--text2)">{{ d.message }}</span>
+          <span class="hs {{ d.status_class }}">{{ d.status }}</span>
+          <span class="ht">{{ d.time }}</span>
         </div>
+        {% else %}
+        <div style="text-align:center;color:var(--text3);font-size:.75rem;padding:1.5rem">
+          No history yet — run a pipeline build first
+        </div>
+        {% endfor %}
       </div>
 
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:1.5rem;">
+    <div class="col">
 
+      <!-- Metrics -->
       <div class="card">
-        <div class="card-title">System Metrics</div>
+        <div class="card-title">System Resources</div>
         <div class="metric">
           <div class="metric-header">
-            <span class="metric-label">CPU Usage</span>
-            <span class="metric-value">{{ cpu_percent }}%</span>
+            <span class="metric-lbl">CPU Usage</span>
+            <span class="metric-val">{{ cpu_percent }}%</span>
           </div>
-          <div class="bar-track"><div class="bar-fill cpu" style="width:{{ cpu_percent }}%"></div></div>
+          <div class="bar-track"><div class="bar-fill bar-cpu" id="barCpu" style="width:0%"></div></div>
         </div>
         <div class="metric">
           <div class="metric-header">
-            <span class="metric-label">Memory Usage</span>
-            <span class="metric-value">{{ mem_percent }}%</span>
+            <span class="metric-lbl">Memory Usage</span>
+            <span class="metric-val">{{ mem_percent }}%</span>
           </div>
-          <div class="bar-track"><div class="bar-fill mem" style="width:{{ mem_percent }}%"></div></div>
+          <div class="bar-track"><div class="bar-fill bar-mem" id="barMem" style="width:0%"></div></div>
         </div>
         <div class="metric">
           <div class="metric-header">
-            <span class="metric-label">Disk Usage</span>
-            <span class="metric-value">{{ disk_percent }}%</span>
+            <span class="metric-lbl">Disk Usage</span>
+            <span class="metric-val">{{ disk_percent }}%</span>
           </div>
-          <div class="bar-track"><div class="bar-fill disk" style="width:{{ disk_percent }}%"></div></div>
+          <div class="bar-track"><div class="bar-fill bar-disk" id="barDisk" style="width:0%"></div></div>
         </div>
-        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
-          <div class="docker-row">
-            <span class="docker-key">Total RAM</span>
-            <span class="docker-val">{{ total_ram }}</span>
-          </div>
-          <div class="docker-row">
-            <span class="docker-key">Used RAM</span>
-            <span class="docker-val accent">{{ used_ram }}</span>
-          </div>
-          <div class="docker-row">
-            <span class="docker-key">Free RAM</span>
-            <span class="docker-val green">{{ free_ram }}</span>
-          </div>
+        <div class="ram-grid">
+          <div class="ram-item"><div class="ram-lbl">Total</div><div class="ram-val">{{ total_ram }}</div></div>
+          <div class="ram-item"><div class="ram-lbl">Used</div><div class="ram-val" style="color:var(--accent)">{{ used_ram }}</div></div>
+          <div class="ram-item"><div class="ram-lbl">Free</div><div class="ram-val" style="color:var(--green)">{{ free_ram }}</div></div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-title">Container Info</div>
-        <div class="docker-info">
-          <div class="docker-row">
-            <span class="docker-key">Container</span>
-            <span class="docker-val accent">{{ container_name }}</span>
-          </div>
-          <div class="docker-row">
-            <span class="docker-key">Image</span>
-            <span class="docker-val">{{ container_image }}</span>
-          </div>
-          <div class="docker-row">
-            <span class="docker-key">Status</span>
-            <span class="docker-val green">{{ container_status }}</span>
-          </div>
-          <div class="docker-row">
-            <span class="docker-key">Port</span>
-            <span class="docker-val">0.0.0.0:5000</span>
-          </div>
-          <div class="docker-row">
-            <span class="docker-key">Restart Policy</span>
-            <span class="docker-val">always</span>
-          </div>
+      <!-- Container quick info -->
+      <div class="card" style="cursor:pointer" onclick="openDockerModal()">
+        <div class="card-title">Container Info <span style="font-size:.6rem;color:var(--accent);margin-left:4px">(click for full details)</span></div>
+        <div id="containerQuick">
+          <div class="modal-row"><span class="modal-key">Name</span><span class="modal-val accent">{{ container.name }}</span></div>
+          <div class="modal-row"><span class="modal-key">Image</span><span class="modal-val">{{ container.image }}</span></div>
+          <div class="modal-row"><span class="modal-key">Status</span><span class="modal-val green">{{ container.status }}</span></div>
+          <div class="modal-row"><span class="modal-key">Port</span><span class="modal-val">0.0.0.0:5000</span></div>
         </div>
       </div>
 
     </div>
   </div>
 
+  <!-- FOOTER -->
   <div class="footer">
-    <div>DevOps Pipeline — Automated Rollback System</div>
-    <div class="footer-tools">
-      <span class="tool-tag">Jenkins</span>
-      <span class="tool-tag">Docker</span>
-      <span class="tool-tag">Ansible</span>
-      <span class="tool-tag">AWS EC2</span>
-      <span class="tool-tag">S3</span>
+    <span>DevOps Pipeline — Automated Rollback System</span>
+    <div class="tags">
+      <span class="tag">Jenkins</span>
+      <span class="tag">Docker</span>
+      <span class="tag">Ansible</span>
+      <span class="tag">AWS EC2</span>
+      <span class="tag">S3</span>
     </div>
   </div>
 
 </div>
+
+<!-- DOCKER MODAL -->
+<div class="modal-overlay" id="dockerModal" onclick="closeOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🐳 Docker Container Details</span>
+      <button class="modal-close" onclick="closeDockerModal()">✕</button>
+    </div>
+    <div id="modalBody">
+      <div class="modal-loading">Loading container info...</div>
+    </div>
+  </div>
+</div>
+
 <script>
-  setTimeout(() => location.reload(), 30000);
+  // Animate bars on load
   window.addEventListener('load', () => {
-    document.querySelectorAll('.bar-fill').forEach(bar => {
-      const w = bar.style.width;
-      bar.style.width = '0%';
-      setTimeout(() => { bar.style.width = w; }, 100);
-    });
+    setTimeout(() => {
+      document.getElementById('barCpu').style.width  = '{{ cpu_percent }}%';
+      document.getElementById('barMem').style.width  = '{{ mem_percent }}%';
+      document.getElementById('barDisk').style.width = '{{ disk_percent }}%';
+    }, 100);
   });
+
+  // Live clock
+  function updateClock() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    document.getElementById('clock').textContent =
+      `${now.getUTCFullYear()}-${pad(now.getUTCMonth()+1)}-${pad(now.getUTCDate())} ` +
+      `${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())} UTC`;
+  }
+  setInterval(updateClock, 1000);
+
+  // Docker modal
+  function openDockerModal() {
+    document.getElementById('dockerModal').classList.add('open');
+    document.getElementById('modalBody').innerHTML = '<div class="modal-loading">Loading container info...</div>';
+    fetch('/api/container')
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById('modalBody').innerHTML = `
+          <div class="modal-row"><span class="modal-key">Container Name</span><span class="modal-val accent">${d.name}</span></div>
+          <div class="modal-row"><span class="modal-key">Image</span><span class="modal-val">${d.image}</span></div>
+          <div class="modal-row"><span class="modal-key">Status</span><span class="modal-val green">${d.status}</span></div>
+          <div class="modal-row"><span class="modal-key">Started At</span><span class="modal-val">${d.started}</span></div>
+          <div class="modal-row"><span class="modal-key">Port Binding</span><span class="modal-val">0.0.0.0:5000 → 5000</span></div>
+          <div class="modal-row"><span class="modal-key">Container IP</span><span class="modal-val accent">${d.ip}</span></div>
+          <div class="modal-row"><span class="modal-key">Restart Policy</span><span class="modal-val">${d.restart}</span></div>
+          <div class="modal-row"><span class="modal-key">Docker Socket</span><span class="modal-val green">/var/run/docker.sock</span></div>
+        `;
+      })
+      .catch(() => {
+        document.getElementById('modalBody').innerHTML =
+          '<div class="modal-loading" style="color:var(--danger)">Could not fetch container details</div>';
+      });
+  }
+
+  function closeDockerModal() {
+    document.getElementById('dockerModal').classList.remove('open');
+  }
+
+  function closeOnOverlay(e) {
+    if (e.target === document.getElementById('dockerModal')) closeDockerModal();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeDockerModal();
+  });
+
+  // Auto refresh every 30 seconds
+  setTimeout(() => location.reload(), 30000);
 </script>
 </body>
 </html>
