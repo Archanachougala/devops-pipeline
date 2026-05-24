@@ -1,10 +1,9 @@
 ---
 - name: Deploy application
   hosts: localhost
-  become: yes
   vars:
     app_version: "{{ version }}"
-    s3_bucket: "devops-pipeline-deployments-yourname"
+    s3_bucket: "devops-pipeline-deployments-archana"
 
   tasks:
     - name: Stop existing container
@@ -24,5 +23,6 @@
         devops-app:{{ app_version }}
 
     - name: Save current version to S3
-      shell: echo "{{ app_version }}" > /tmp/current_version.txt &&
-             aws s3 cp /tmp/current_version.txt s3://{{ s3_bucket }}/current_version.txt
+      shell: |
+        echo "{{ app_version }}" > /tmp/current_version.txt
+        aws s3 cp /tmp/current_version.txt s3://{{ s3_bucket }}/current_version.txt

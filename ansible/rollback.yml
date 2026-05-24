@@ -1,9 +1,8 @@
 ---
 - name: Rollback to previous version
   hosts: localhost
-  become: yes
   vars:
-    s3_bucket: "devops-pipeline-deployments-yourname"
+    s3_bucket: "devops-pipeline-deployments-archana"
 
   tasks:
     - name: Get previous version from S3

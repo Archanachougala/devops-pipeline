@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        S3_BUCKET = 'devops-pipeline-deployments-yourname'
+        S3_BUCKET = 'devops-pipeline-deployments-archana'
         APP_IP = 'localhost'
         SLACK_CHANNEL = '#deployments'
     }
