@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         S3_BUCKET = 'devops-pipeline-deployments-archana'
-        APP_IP = 'localhost'
         SLACK_CHANNEL = '#deployments'
     }
 
@@ -18,7 +17,7 @@ pipeline {
         stage('Save Previous Version') {
             steps {
                 sh '''
-                    CURRENT=$(docker inspect devops-app --format={{.Config.Image}} 2>/dev/null || echo "none")
+                    CURRENT=$(docker inspect devops-app --format="{{.Config.Image}}" 2>/dev/null | cut -d: -f2 || echo "none")
                     echo $CURRENT > /tmp/previous_version.txt
                     aws s3 cp /tmp/previous_version.txt s3://$S3_BUCKET/previous_version.txt || true
                 '''
@@ -47,8 +46,10 @@ pipeline {
         stage('Health Check') {
             steps {
                 sh '''
-                    echo "Waiting 15 seconds for app to start..."
-                    sleep 15
+                    echo "Waiting 20 seconds for app to start..."
+                    sleep 20
+                    APP_IP=$(docker inspect devops-app --format="{{.NetworkSettings.IPAddress}}")
+                    echo "App IP: $APP_IP"
                     curl -f http://$APP_IP:5000/health
                 '''
             }
