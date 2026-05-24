@@ -15,12 +15,12 @@
       ignore_errors: yes
 
     - name: Run new container
-      command: >
-        docker run -d
-        -p 5000:5000
-        --name devops-app
-        -e APP_VERSION={{ app_version }}
-        devops-app:{{ app_version }}
+      shell: |
+        docker run -d \
+          --network host \
+          --name devops-app \
+          -e APP_VERSION={{ app_version }} \
+          devops-app:{{ app_version }}
 
     - name: Save current version to S3
       shell: |

@@ -6,11 +6,15 @@
 
   tasks:
     - name: Get previous version from S3
-      command: aws s3 cp s3://{{ s3_bucket }}/previous_version.txt /tmp/previous_version.txt
+      shell: aws s3 cp s3://{{ s3_bucket }}/previous_version.txt /tmp/previous_version.txt
 
     - name: Read previous version
-      command: cat /tmp/previous_version.txt
+      shell: cat /tmp/previous_version.txt | tr -d '[:space:]'
       register: prev_version
+
+    - name: Show previous version
+      debug:
+        msg: "Rolling back to version: {{ prev_version.stdout }}"
 
     - name: Stop broken container
       command: docker stop devops-app
@@ -21,10 +25,10 @@
       ignore_errors: yes
 
     - name: Redeploy previous version
-      command: >
-        docker run -d
-        -p 5000:5000
-        --name devops-app
-        -e APP_VERSION={{ prev_version.stdout | trim }}
-        devops-app:{{ prev_version.stdout | trim }}
-      when: prev_version.stdout | trim != "none"
+      shell: |
+        docker run -d \
+          --network host \
+          --name devops-app \
+          -e APP_VERSION={{ prev_version.stdout }} \
+          devops-app:{{ prev_version.stdout }}
+      when: prev_version.stdout != "none" and prev_version.stdout != ""
