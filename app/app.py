@@ -229,7 +229,7 @@ def container_details():
             "Status":  "running",
             "Port":    "0.0.0.0:5000",
             "Version": VERSION
-        })
+        }
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
