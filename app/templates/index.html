@@ -81,12 +81,10 @@
     .bar-cpu{background:linear-gradient(90deg,var(--accent),#0099ff);}
     .bar-mem{background:linear-gradient(90deg,var(--green),#00cc6a);}
     .bar-disk{background:linear-gradient(90deg,var(--orange),#ff9f00);}
-
-    .ram-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.4rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);}
+    .ram-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);}
     .ram-item{background:var(--surface2);border-radius:8px;padding:.6rem;text-align:center;}
-    .ram-lbl{font-size:.58rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
-    .ram-val{font-size:.75rem;font-weight:600;color:var(--text);}
-    .ram-note{grid-column:1/-1;font-size:.58rem;color:var(--text3);text-align:center;padding-top:.4rem;}
+    .ram-lbl{font-size:.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+    .ram-val{font-size:.8rem;font-weight:600;color:var(--text);}
 
     .history-item{display:grid;grid-template-columns:55px 1fr auto auto;align-items:center;gap:.75rem;padding:.7rem .9rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border);font-size:.72rem;margin-bottom:.5rem;transition:border-color .2s;}
     .history-item:hover{border-color:var(--accent);}
@@ -252,23 +250,9 @@
           <div class="bar-track"><div class="bar-fill bar-disk" id="barDisk" style="width:0%"></div></div>
         </div>
         <div class="ram-grid">
-          <div class="ram-item">
-            <div class="ram-lbl">Total</div>
-            <div class="ram-val">{{ total_ram }}</div>
-          </div>
-          <div class="ram-item">
-            <div class="ram-lbl">Used</div>
-            <div class="ram-val" style="color:var(--accent)">{{ used_ram }}</div>
-          </div>
-          <div class="ram-item">
-            <div class="ram-lbl">Cached</div>
-            <div class="ram-val" style="color:var(--warn)">{{ cached_ram }}</div>
-          </div>
-          <div class="ram-item">
-            <div class="ram-lbl">Available</div>
-            <div class="ram-val" style="color:var(--green)">{{ free_ram }}</div>
-          </div>
-          <div class="ram-note">Used + Cached + Available = Total RAM</div>
+          <div class="ram-item"><div class="ram-lbl">Total</div><div class="ram-val">{{ total_ram }}</div></div>
+          <div class="ram-item"><div class="ram-lbl">Used</div><div class="ram-val" style="color:var(--accent)">{{ used_ram }}</div></div>
+          <div class="ram-item"><div class="ram-lbl">Free</div><div class="ram-val" style="color:var(--green)">{{ free_ram }}</div></div>
         </div>
       </div>
 
@@ -356,7 +340,7 @@
 </div>
 
 <script>
-  // Animate bars
+  // Animate bars on load
   window.addEventListener('load', () => {
     setTimeout(() => {
       document.getElementById('barCpu').style.width  = '{{ cpu_percent }}%';
@@ -375,6 +359,7 @@
   }
   setInterval(updateClock, 1000);
 
+  // Modal helpers
   function closeModal(id) {
     document.getElementById(id).classList.remove('open');
   }
@@ -384,12 +369,11 @@
   }
 
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      ['dockerModal','ansibleModal','jenkinsModal','healthModal']
-        .forEach(id => closeModal(id));
-    }
+    if (e.key === 'Escape')
+      ['dockerModal','ansibleModal','jenkinsModal','healthModal'].forEach(closeModal);
   });
 
+  // Docker modal — fixed to use /container-details
   function openDockerModal() {
     document.getElementById('dockerModal').classList.add('open');
     document.getElementById('dockerModalBody').innerHTML = '<div class="modal-loading">Loading container info...</div>';
