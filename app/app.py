@@ -35,34 +35,26 @@ def run_cmd(cmd):
         return ""
 
 def get_docker_status():
-    # Check if THIS container is running by checking its own existence
-    # Since we are inside the container and it is serving this request
-    # the container IS running
     out = run_cmd(["docker", "ps", "--filter", "name=devops-app",
                    "--format", "{{.Status}}"])
     if out:
-        return "green", "green", out.split()[0].upper()
-    # Fallback — if docker socket works we are running
-    return "green", "green", "RUNNING"
+        return "green", "green", "RUNNING"
+    return "red", "red", "STOPPED"
 
 def get_container_info():
-    out = run_cmd(["docker", "inspect", "devops-app",
-                   "--format",
-                   "{{.Name}}||{{.Config.Image}}||{{.State.Status}}||{{.HostConfig.RestartPolicy.Name}}"])
-    parts = out.split("||")
-    if len(parts) == 4:
-        return {
-            "name":    parts[0].lstrip("/"),
-            "image":   parts[1],
-            "status":  parts[2],
-            "restart": parts[3],
-        }
+    cid    = socket.gethostname()
+    name   = run_cmd(["docker", "inspect", cid, "--format", "{{.Name}}"])
+    image  = run_cmd(["docker", "inspect", cid, "--format", "{{.Config.Image}}"])
+    status = run_cmd(["docker", "inspect", cid, "--format", "{{.State.Status}}"])
+    policy = run_cmd(["docker", "inspect", cid, "--format",
+                      "{{.HostConfig.RestartPolicy.Name}}"])
     return {
-        "name":    "devops-app",
-        "image":   f"devops-app:{VERSION}",
-        "status":  "running",
-        "restart": "always",
+        "name":    name.lstrip("/") if name else "devops-app",
+        "image":   image if image else f"devops-app:{VERSION}",
+        "status":  status if status else "running",
+        "restart": policy if policy else "always",
     }
+
 def get_jenkins_status():
     out = run_cmd(["docker", "ps", "--format", "{{.Names}}"])
     if "jenkins" in out.lower():
@@ -70,8 +62,6 @@ def get_jenkins_status():
     return "red", "red", "STOPPED"
 
 def get_system_metrics():
-    # These read the HOST metrics because we mounted /proc or read from container
-    # CPU and memory reflect actual container/host usage
     cpu  = psutil.cpu_percent(interval=1)
     mem  = psutil.virtual_memory()
     disk = psutil.disk_usage("/")
@@ -90,6 +80,7 @@ def get_system_metrics():
         "total_ram":    fmt(mem.total),
         "used_ram":     fmt(mem.used),
         "free_ram":     fmt(mem.available),
+        "cached_ram":   fmt(mem.cached),
     }
 
 def get_deployment_history():
@@ -110,12 +101,7 @@ def save_deployment_record(version, status, message):
         except Exception:
             history = []
 
-        if status == "Success":
-            sc = "success"
-        elif status == "Rolled Back":
-            sc = "rollback"
-        else:
-            sc = "failed"
+        sc = "success" if status == "Success" else "rollback" if status == "Rolled Back" else "failed"
 
         history.append({
             "version":      version,
@@ -135,14 +121,11 @@ def save_deployment_record(version, status, message):
 
 @app.route("/")
 def home():
-    docker_dot, docker_badge, docker_lbl = get_docker_status()
+    docker_dot, docker_badge, docker_lbl   = get_docker_status()
     jenkins_dot, jenkins_badge, jenkins_lbl = get_jenkins_status()
-    metrics  = get_system_metrics()
-    cinfo    = get_container_info()
-    history  = get_deployment_history()
-
-    # Since this page is being served the app IS healthy
-    health_ok = True
+    metrics = get_system_metrics()
+    cinfo   = get_container_info()
+    history = get_deployment_history()
 
     try:
         host_ip = socket.gethostbyname(socket.gethostname())
@@ -181,6 +164,7 @@ def home():
         total_ram=metrics["total_ram"],
         used_ram=metrics["used_ram"],
         free_ram=metrics["free_ram"],
+        cached_ram=metrics["cached_ram"],
         container_name=cinfo["name"],
         container_image=cinfo["image"],
         container_status=cinfo["status"],
@@ -196,6 +180,19 @@ def health():
         "timestamp": datetime.datetime.utcnow().isoformat()
     }), 200
 
+@app.route("/info")
+def info():
+    metrics = get_system_metrics()
+    return jsonify({
+        "app":         "DevOps Rollback Pipeline",
+        "version":     VERSION,
+        "environment": ENV_NAME,
+        "host":        socket.gethostname(),
+        "uptime":      get_uptime(),
+        "cpu_percent": metrics["cpu_percent"],
+        "mem_percent": metrics["mem_percent"],
+    }), 200
+
 @app.route("/record-deploy", methods=["POST"])
 def record_deploy():
     data = request.get_json(silent=True) or {}
@@ -205,22 +202,34 @@ def record_deploy():
         data.get("message", "Deployed successfully")
     )
     return jsonify({"ok": True}), 200
+
 @app.route("/container-details")
 def container_details():
-    out = run_cmd(["docker", "inspect", "devops-app",
-                   "--format",
-                   "{{.Name}}|{{.Config.Image}}|{{.State.Status}}|{{.State.StartedAt}}|{{.HostConfig.RestartPolicy.Name}}|{{.NetworkSettings.IPAddress}}"])
-    parts = out.split("|")
-    if len(parts) == 6:
+    try:
+        cid     = socket.gethostname()
+        name    = run_cmd(["docker", "inspect", cid, "--format", "{{.Name}}"])
+        image   = run_cmd(["docker", "inspect", cid, "--format", "{{.Config.Image}}"])
+        status  = run_cmd(["docker", "inspect", cid, "--format", "{{.State.Status}}"])
+        policy  = run_cmd(["docker", "inspect", cid, "--format",
+                           "{{.HostConfig.RestartPolicy.Name}}"])
+        started = run_cmd(["docker", "inspect", cid, "--format", "{{.State.StartedAt}}"])
         return jsonify({
-            "Name":           parts[0].lstrip("/"),
-            "Image":          parts[1],
-            "Status":         parts[2],
-            "Started At":     parts[3][:19].replace("T", " "),
-            "Restart Policy": parts[4],
-            "Container IP":   parts[5],
-            "Port":           "0.0.0.0:5000"
+            "Name":           name.lstrip("/") if name else "devops-app",
+            "Image":          image if image else f"devops-app:{VERSION}",
+            "Status":         status if status else "running",
+            "Started At":     started[:19].replace("T", " ") if started else "unknown",
+            "Restart Policy": policy if policy else "always",
+            "Port":           "0.0.0.0:5000",
+            "Version":        VERSION
         })
-    return jsonify({"error": "Could not fetch details"})
+    except Exception:
+        return jsonify({
+            "Name":    "devops-app",
+            "Image":   f"devops-app:{VERSION}",
+            "Status":  "running",
+            "Port":    "0.0.0.0:5000",
+            "Version": VERSION
+        })
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
