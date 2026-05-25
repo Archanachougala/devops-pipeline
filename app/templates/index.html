@@ -17,7 +17,6 @@
     body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
     .wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:2rem 1.5rem;}
 
-    /* HEADER */
     .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);}
     .logo{font-family:var(--sans);font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
     .logo-sub{font-size:.72rem;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;margin-top:4px;}
@@ -27,7 +26,6 @@
     @keyframes blink{0%,100%{opacity:1;box-shadow:0 0 6px var(--green)}50%{opacity:.3;box-shadow:none}}
     .ts{font-size:.7rem;color:var(--text3);}
 
-    /* HERO */
     .hero{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;}
     .hc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;animation:fadeUp .5s ease both;}
     .hc:hover{border-color:var(--accent);transform:translateY(-2px);}
@@ -40,14 +38,12 @@
     .hc-val{font-family:var(--sans);font-size:1.3rem;font-weight:700;}
     .hc-sub{font-size:.7rem;color:var(--text2);margin-top:.25rem;}
 
-    /* MAIN GRID */
     .grid{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
     .col{display:flex;flex-direction:column;gap:1.5rem;}
     .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;}
     .card-title{font-size:.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;}
     .card-title::after{content:'';flex:1;height:1px;background:var(--border);}
 
-    /* PIPELINE */
     .pipeline{display:flex;align-items:center;margin-bottom:1.5rem;}
     .stage{flex:1;text-align:center;position:relative;}
     .stage:not(:last-child)::after{content:'';position:absolute;top:22px;height:2px;background:var(--border);left:50%;width:calc(100% - 44px);transform:translateX(22px);}
@@ -59,7 +55,6 @@
     .stage.done .stage-name{color:var(--green);}
     .stage.fail .stage-name{color:var(--danger);}
 
-    /* STATUS LIST */
     .status-list{display:flex;flex-direction:column;gap:.75rem;}
     .status-item{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border);transition:border-color .2s,transform .2s;cursor:pointer;}
     .status-item:hover{border-color:var(--accent);transform:translateX(2px);}
@@ -76,7 +71,6 @@
     .badge.blue{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2);}
     .badge.yellow{background:rgba(255,184,0,.1);color:var(--warn);border:1px solid rgba(255,184,0,.2);}
 
-    /* METRICS */
     .metric{margin-bottom:1rem;}
     .metric:last-child{margin-bottom:0;}
     .metric-header{display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:.72rem;}
@@ -87,12 +81,13 @@
     .bar-cpu{background:linear-gradient(90deg,var(--accent),#0099ff);}
     .bar-mem{background:linear-gradient(90deg,var(--green),#00cc6a);}
     .bar-disk{background:linear-gradient(90deg,var(--orange),#ff9f00);}
-    .ram-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);}
-    .ram-item{background:var(--surface2);border-radius:8px;padding:.6rem;text-align:center;}
-    .ram-lbl{font-size:.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
-    .ram-val{font-size:.8rem;font-weight:600;color:var(--text);}
 
-    /* HISTORY */
+    .ram-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.4rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);}
+    .ram-item{background:var(--surface2);border-radius:8px;padding:.6rem;text-align:center;}
+    .ram-lbl{font-size:.58rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+    .ram-val{font-size:.75rem;font-weight:600;color:var(--text);}
+    .ram-note{grid-column:1/-1;font-size:.58rem;color:var(--text3);text-align:center;padding-top:.4rem;}
+
     .history-item{display:grid;grid-template-columns:55px 1fr auto auto;align-items:center;gap:.75rem;padding:.7rem .9rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border);font-size:.72rem;margin-bottom:.5rem;transition:border-color .2s;}
     .history-item:hover{border-color:var(--accent);}
     .history-item:last-child{margin-bottom:0;}
@@ -103,12 +98,10 @@
     .hs.failed{background:rgba(255,59,92,.1);color:var(--danger);}
     .ht{color:var(--text3);font-size:.65rem;white-space:nowrap;}
 
-    /* FOOTER */
     .footer{margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:.65rem;color:var(--text3);}
     .tags{display:flex;gap:.5rem;}
     .tag{padding:2px 8px;border-radius:4px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);}
 
-    /* MODAL */
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;}
     .modal-overlay.open{display:flex;}
     .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;width:500px;max-width:90vw;animation:modalIn .2s ease;}
@@ -136,7 +129,6 @@
 <body>
 <div class="wrap">
 
-  <!-- HEADER -->
   <div class="header">
     <div>
       <div class="logo">DevOps Pipeline</div>
@@ -148,7 +140,6 @@
     </div>
   </div>
 
-  <!-- HERO CARDS -->
   <div class="hero">
     <div class="hc c1">
       <div class="hc-lbl">App Version</div>
@@ -172,11 +163,9 @@
     </div>
   </div>
 
-  <!-- MAIN GRID -->
   <div class="grid">
     <div class="col">
 
-      <!-- Pipeline + status -->
       <div class="card">
         <div class="card-title">CI/CD Pipeline</div>
         <div class="pipeline">
@@ -188,39 +177,37 @@
         </div>
 
         <div class="status-list">
-          <!-- Docker — clickable -->
-          <div class="status-item" onclick="openDockerModal()" title="Click to see container details">
+          <div class="status-item" onclick="openDockerModal()">
             <div class="status-left">
               <div class="dot {{ docker_dot }}"></div>
               <div class="sname">🐳 Docker Container <span style="font-size:.6rem;color:var(--text3)">(click for details)</span></div>
             </div>
             <span class="badge {{ docker_badge_class }}">{{ docker_status }}</span>
           </div>
-          <div class="status-item" onclick="alert('Ansible last ran: deploy.yml\nTasks: 4 passed, 0 failed\nTarget: localhost')">
+          <div class="status-item" onclick="openAnsibleModal()">
             <div class="status-left">
               <div class="dot {{ ansible_dot }}"></div>
-              <div class="sname">⚙ Ansible Playbook</div>
+              <div class="sname">⚙ Ansible Playbook <span style="font-size:.6rem;color:var(--text3)">(click for details)</span></div>
             </div>
             <span class="badge {{ ansible_badge_class }}">{{ ansible_status }}</span>
           </div>
-          <div class="status-item" onclick="alert('Jenkins is running on port 8080\nVersion: LTS\nContainer: jenkins/jenkins:lts')">
+          <div class="status-item" onclick="openJenkinsModal()">
             <div class="status-left">
               <div class="dot {{ jenkins_dot }}"></div>
-              <div class="sname">🔧 Jenkins CI/CD</div>
+              <div class="sname">🔧 Jenkins CI/CD <span style="font-size:.6rem;color:var(--text3)">(click for details)</span></div>
             </div>
             <span class="badge {{ jenkins_badge_class }}">{{ jenkins_status }}</span>
           </div>
-          <div class="status-item" onclick="fetch('/health').then(r=>r.json()).then(d=>alert('Health endpoint: /health\nStatus: '+d.status+'\nVersion: '+d.version))">
+          <div class="status-item" onclick="openHealthModal()">
             <div class="status-left">
               <div class="dot {{ health_dot }}"></div>
-              <div class="sname">❤ Health Check</div>
+              <div class="sname">❤ Health Check <span style="font-size:.6rem;color:var(--text3)">(click for details)</span></div>
             </div>
             <span class="badge {{ health_badge_class }}">{{ health_status }}</span>
           </div>
         </div>
       </div>
 
-      <!-- History -->
       <div class="card">
         <div class="card-title">Deployment History</div>
         {% for d in deployment_history %}
@@ -241,7 +228,6 @@
 
     <div class="col">
 
-      <!-- Metrics -->
       <div class="card">
         <div class="card-title">System Resources</div>
         <div class="metric">
@@ -266,27 +252,38 @@
           <div class="bar-track"><div class="bar-fill bar-disk" id="barDisk" style="width:0%"></div></div>
         </div>
         <div class="ram-grid">
-          <div class="ram-item"><div class="ram-lbl">Total</div><div class="ram-val">{{ total_ram }}</div></div>
-          <div class="ram-item"><div class="ram-lbl">Used</div><div class="ram-val" style="color:var(--accent)">{{ used_ram }}</div></div>
-          <div class="ram-item"><div class="ram-lbl">Free</div><div class="ram-val" style="color:var(--green)">{{ free_ram }}</div></div>
+          <div class="ram-item">
+            <div class="ram-lbl">Total</div>
+            <div class="ram-val">{{ total_ram }}</div>
+          </div>
+          <div class="ram-item">
+            <div class="ram-lbl">Used</div>
+            <div class="ram-val" style="color:var(--accent)">{{ used_ram }}</div>
+          </div>
+          <div class="ram-item">
+            <div class="ram-lbl">Cached</div>
+            <div class="ram-val" style="color:var(--warn)">{{ cached_ram }}</div>
+          </div>
+          <div class="ram-item">
+            <div class="ram-lbl">Available</div>
+            <div class="ram-val" style="color:var(--green)">{{ free_ram }}</div>
+          </div>
+          <div class="ram-note">Used + Cached + Available = Total RAM</div>
         </div>
       </div>
 
-      <!-- Container quick info -->
       <div class="card" style="cursor:pointer" onclick="openDockerModal()">
         <div class="card-title">Container Info <span style="font-size:.6rem;color:var(--accent);margin-left:4px">(click for full details)</span></div>
-        <div id="containerQuick">
-          <div class="modal-row"><span class="modal-key">Name</span><span class="modal-val accent">{{ container_name }}</span></div>
-          <div class="modal-row"><span class="modal-key">Image</span><span class="modal-val">{{ container_image }}</span></div>
-          <div class="modal-row"><span class="modal-key">Status</span><span class="modal-val green">{{ container_status }}</span></div>
-          <div class="modal-row"><span class="modal-key">Port</span><span class="modal-val">0.0.0.0:5000</span></div>
-        </div>
+        <div class="modal-row"><span class="modal-key">Name</span><span class="modal-val accent">{{ container_name }}</span></div>
+        <div class="modal-row"><span class="modal-key">Image</span><span class="modal-val">{{ container_image }}</span></div>
+        <div class="modal-row"><span class="modal-key">Status</span><span class="modal-val green">{{ container_status }}</span></div>
+        <div class="modal-row"><span class="modal-key">Port</span><span class="modal-val">0.0.0.0:5000</span></div>
+        <div class="modal-row"><span class="modal-key">Restart</span><span class="modal-val">{{ container_restart }}</span></div>
       </div>
 
     </div>
   </div>
 
-  <!-- FOOTER -->
   <div class="footer">
     <span>DevOps Pipeline — Automated Rollback System</span>
     <div class="tags">
@@ -301,20 +298,65 @@
 </div>
 
 <!-- DOCKER MODAL -->
-<div class="modal-overlay" id="dockerModal" onclick="closeOnOverlay(event)">
+<div class="modal-overlay" id="dockerModal" onclick="closeOnOverlay(event,'dockerModal')">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title">🐳 Docker Container Details</span>
-      <button class="modal-close" onclick="closeDockerModal()">✕</button>
+      <button class="modal-close" onclick="closeModal('dockerModal')">✕</button>
     </div>
-    <div id="modalBody">
-      <div class="modal-loading">Loading container info...</div>
+    <div id="dockerModalBody"><div class="modal-loading">Loading...</div></div>
+  </div>
+</div>
+
+<!-- ANSIBLE MODAL -->
+<div class="modal-overlay" id="ansibleModal" onclick="closeOnOverlay(event,'ansibleModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">⚙ Ansible Playbook Details</span>
+      <button class="modal-close" onclick="closeModal('ansibleModal')">✕</button>
+    </div>
+    <div>
+      <div class="modal-row"><span class="modal-key">Playbook</span><span class="modal-val accent">deploy.yml</span></div>
+      <div class="modal-row"><span class="modal-key">Target Host</span><span class="modal-val">localhost</span></div>
+      <div class="modal-row"><span class="modal-key">Tasks</span><span class="modal-val green">4 passed, 0 failed</span></div>
+      <div class="modal-row"><span class="modal-key">Last Action</span><span class="modal-val">Stop → Remove → Run → Record</span></div>
+      <div class="modal-row"><span class="modal-key">Inventory</span><span class="modal-val">ansible/inventory.ini</span></div>
+      <div class="modal-row"><span class="modal-key">Status</span><span class="modal-val green">SUCCESS</span></div>
     </div>
   </div>
 </div>
 
+<!-- JENKINS MODAL -->
+<div class="modal-overlay" id="jenkinsModal" onclick="closeOnOverlay(event,'jenkinsModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🔧 Jenkins CI/CD Details</span>
+      <button class="modal-close" onclick="closeModal('jenkinsModal')">✕</button>
+    </div>
+    <div>
+      <div class="modal-row"><span class="modal-key">Container</span><span class="modal-val accent">jenkins</span></div>
+      <div class="modal-row"><span class="modal-key">Port</span><span class="modal-val">0.0.0.0:8080</span></div>
+      <div class="modal-row"><span class="modal-key">Status</span><span class="modal-val green">{{ jenkins_status }}</span></div>
+      <div class="modal-row"><span class="modal-key">Pipeline</span><span class="modal-val">devops-pipeline</span></div>
+      <div class="modal-row"><span class="modal-key">Trigger</span><span class="modal-val">GitHub Push + Manual</span></div>
+      <div class="modal-row"><span class="modal-key">Stages</span><span class="modal-val">Checkout → Build → Deploy → Health</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- HEALTH MODAL -->
+<div class="modal-overlay" id="healthModal" onclick="closeOnOverlay(event,'healthModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">❤ Health Check Details</span>
+      <button class="modal-close" onclick="closeModal('healthModal')">✕</button>
+    </div>
+    <div id="healthModalBody"><div class="modal-loading">Checking health...</div></div>
+  </div>
+</div>
+
 <script>
-  // Animate bars on load
+  // Animate bars
   window.addEventListener('load', () => {
     setTimeout(() => {
       document.getElementById('barCpu').style.width  = '{{ cpu_percent }}%';
@@ -328,79 +370,80 @@
     const now = new Date();
     const pad = n => String(n).padStart(2,'0');
     document.getElementById('clock').textContent =
-      `${now.getUTCFullYear()}-${pad(now.getUTCMonth()+1)}-${pad(now.getUTCDate())} ` +
-      `${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())} UTC`;
+      now.getUTCFullYear()+'-'+pad(now.getUTCMonth()+1)+'-'+pad(now.getUTCDate())+' '+
+      pad(now.getUTCHours())+':'+pad(now.getUTCMinutes())+':'+pad(now.getUTCSeconds())+' UTC';
   }
   setInterval(updateClock, 1000);
 
-  // Docker modal
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  function closeOnOverlay(e, id) {
+    if (e.target === document.getElementById(id)) closeModal(id);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      ['dockerModal','ansibleModal','jenkinsModal','healthModal']
+        .forEach(id => closeModal(id));
+    }
+  });
+
   function openDockerModal() {
     document.getElementById('dockerModal').classList.add('open');
-    document.getElementById('modalBody').innerHTML = '<div class="modal-loading">Loading container info...</div>';
-    fetch('/api/container')
+    document.getElementById('dockerModalBody').innerHTML = '<div class="modal-loading">Loading container info...</div>';
+    fetch('/container-details')
       .then(r => r.json())
       .then(d => {
-        document.getElementById('modalBody').innerHTML = `
-          <div class="modal-row"><span class="modal-key">Container Name</span><span class="modal-val accent">${d.name}</span></div>
-          <div class="modal-row"><span class="modal-key">Image</span><span class="modal-val">${d.image}</span></div>
-          <div class="modal-row"><span class="modal-key">Status</span><span class="modal-val green">${d.status}</span></div>
-          <div class="modal-row"><span class="modal-key">Started At</span><span class="modal-val">${d.started}</span></div>
+        document.getElementById('dockerModalBody').innerHTML = `
+          <div class="modal-row"><span class="modal-key">Container Name</span><span class="modal-val accent">${d.Name||'devops-app'}</span></div>
+          <div class="modal-row"><span class="modal-key">Image</span><span class="modal-val">${d.Image||'—'}</span></div>
+          <div class="modal-row"><span class="modal-key">Status</span><span class="modal-val green">${d.Status||'running'}</span></div>
+          <div class="modal-row"><span class="modal-key">Started At</span><span class="modal-val">${d['Started At']||'—'}</span></div>
           <div class="modal-row"><span class="modal-key">Port Binding</span><span class="modal-val">0.0.0.0:5000 → 5000</span></div>
-          <div class="modal-row"><span class="modal-key">Container IP</span><span class="modal-val accent">${d.ip}</span></div>
-          <div class="modal-row"><span class="modal-key">Restart Policy</span><span class="modal-val">${d.restart}</span></div>
-          <div class="modal-row"><span class="modal-key">Docker Socket</span><span class="modal-val green">/var/run/docker.sock</span></div>
+          <div class="modal-row"><span class="modal-key">Restart Policy</span><span class="modal-val">${d['Restart Policy']||'always'}</span></div>
+          <div class="modal-row"><span class="modal-key">Version</span><span class="modal-val accent">${d.Version||'—'}</span></div>
+          <div class="modal-row"><span class="modal-key">Docker Socket</span><span class="modal-val green">/var/run/docker.sock ✓</span></div>
         `;
       })
       .catch(() => {
-        document.getElementById('modalBody').innerHTML =
+        document.getElementById('dockerModalBody').innerHTML =
           '<div class="modal-loading" style="color:var(--danger)">Could not fetch container details</div>';
       });
   }
 
-  function closeDockerModal() {
-    document.getElementById('dockerModal').classList.remove('open');
+  function openAnsibleModal() {
+    document.getElementById('ansibleModal').classList.add('open');
   }
 
-  function closeOnOverlay(e) {
-    if (e.target === document.getElementById('dockerModal')) closeDockerModal();
+  function openJenkinsModal() {
+    document.getElementById('jenkinsModal').classList.add('open');
   }
 
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeDockerModal();
-  });
+  function openHealthModal() {
+    document.getElementById('healthModal').classList.add('open');
+    document.getElementById('healthModalBody').innerHTML = '<div class="modal-loading">Checking health endpoint...</div>';
+    fetch('/health')
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById('healthModalBody').innerHTML = `
+          <div class="modal-row"><span class="modal-key">Endpoint</span><span class="modal-val accent">/health</span></div>
+          <div class="modal-row"><span class="modal-key">Status</span><span class="modal-val green">${d.status}</span></div>
+          <div class="modal-row"><span class="modal-key">Version</span><span class="modal-val">${d.version}</span></div>
+          <div class="modal-row"><span class="modal-key">Checked At</span><span class="modal-val">${d.timestamp}</span></div>
+          <div class="modal-row"><span class="modal-key">HTTP Code</span><span class="modal-val green">200 OK</span></div>
+          <div class="modal-row"><span class="modal-key">Rollback Trigger</span><span class="modal-val">Non-200 response</span></div>
+        `;
+      })
+      .catch(() => {
+        document.getElementById('healthModalBody').innerHTML =
+          '<div class="modal-loading" style="color:var(--danger)">Health check failed</div>';
+      });
+  }
 
   // Auto refresh every 30 seconds
-<script>
   setTimeout(() => location.reload(), 30000);
-
-  window.addEventListener('load', () => {
-    document.querySelectorAll('.bar-fill').forEach(bar => {
-      const w = bar.style.width;
-      bar.style.width = '0%';
-      setTimeout(() => { bar.style.width = w; }, 100);
-    });
-  });
-
-  // Docker container details popup
-  function showDockerDetails() {
-    fetch('/container-details')
-      .then(r => r.json())
-      .then(data => {
-        const msg = Object.entries(data)
-          .map(([k,v]) => `${k}: ${v}`)
-          .join('\n');
-        alert('Container Details:\n\n' + msg);
-      })
-      .catch(() => alert('Could not fetch container details'));
-  }
-
-  document.querySelectorAll('.status-item').forEach(item => {
-    if (item.textContent.includes('click for details')) {
-      item.style.cursor = 'pointer';
-      item.addEventListener('click', showDockerDetails);
-    }
-  });
-</script>
 </script>
 </body>
 </html>
