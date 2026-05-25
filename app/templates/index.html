@@ -370,7 +370,37 @@
   });
 
   // Auto refresh every 30 seconds
+<script>
   setTimeout(() => location.reload(), 30000);
+
+  window.addEventListener('load', () => {
+    document.querySelectorAll('.bar-fill').forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => { bar.style.width = w; }, 100);
+    });
+  });
+
+  // Docker container details popup
+  function showDockerDetails() {
+    fetch('/container-details')
+      .then(r => r.json())
+      .then(data => {
+        const msg = Object.entries(data)
+          .map(([k,v]) => `${k}: ${v}`)
+          .join('\n');
+        alert('Container Details:\n\n' + msg);
+      })
+      .catch(() => alert('Could not fetch container details'));
+  }
+
+  document.querySelectorAll('.status-item').forEach(item => {
+    if (item.textContent.includes('click for details')) {
+      item.style.cursor = 'pointer';
+      item.addEventListener('click', showDockerDetails);
+    }
+  });
+</script>
 </script>
 </body>
 </html>

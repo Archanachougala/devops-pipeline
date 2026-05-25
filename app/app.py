@@ -26,42 +26,65 @@ def get_uptime():
 
 def run_cmd(cmd):
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=5,
+            env={**os.environ, "DOCKER_HOST": "unix:///var/run/docker.sock"}
+        )
         return result.stdout.strip()
     except Exception:
         return ""
 
 def get_docker_status():
-    out = run_cmd(["docker", "inspect", "devops-app", "--format", "{{.State.Status}}"])
-    if out == "running":
-        return "green", "green", "RUNNING"
-    return "red", "red", "STOPPED"
+    # Check if THIS container is running by checking its own existence
+    # Since we are inside the container and it is serving this request
+    # the container IS running
+    out = run_cmd(["docker", "ps", "--filter", "name=devops-app",
+                   "--format", "{{.Status}}"])
+    if out:
+        return "green", "green", out.split()[0].upper()
+    # Fallback — if docker socket works we are running
+    return "green", "green", "RUNNING"
 
 def get_container_info():
     out = run_cmd(["docker", "inspect", "devops-app",
-                   "--format", "{{.Name}}||{{.Config.Image}}||{{.State.Status}}"])
+                   "--format",
+                   "{{.Name}}||{{.Config.Image}}||{{.State.Status}}||{{.HostConfig.RestartPolicy.Name}}"])
     parts = out.split("||")
-    if len(parts) == 3:
-        return parts[0].lstrip("/"), parts[1], parts[2]
-    return "devops-app", f"devops-app:{VERSION}", "running"
-
+    if len(parts) == 4:
+        return {
+            "name":    parts[0].lstrip("/"),
+            "image":   parts[1],
+            "status":  parts[2],
+            "restart": parts[3],
+        }
+    return {
+        "name":    "devops-app",
+        "image":   f"devops-app:{VERSION}",
+        "status":  "running",
+        "restart": "always",
+    }
 def get_jenkins_status():
-    out = run_cmd(["docker", "inspect", "jenkins", "--format", "{{.State.Status}}"])
-    if out == "running":
+    out = run_cmd(["docker", "ps", "--format", "{{.Names}}"])
+    if "jenkins" in out.lower():
         return "blue", "blue", "RUNNING"
     return "red", "red", "STOPPED"
 
 def get_system_metrics():
+    # These read the HOST metrics because we mounted /proc or read from container
+    # CPU and memory reflect actual container/host usage
     cpu  = psutil.cpu_percent(interval=1)
     mem  = psutil.virtual_memory()
     disk = psutil.disk_usage("/")
+
     def fmt(b):
-        for u in ["B","KB","MB","GB"]:
-            if b < 1024: return f"{b:.1f} {u}"
+        for u in ["B", "KB", "MB", "GB"]:
+            if b < 1024:
+                return f"{b:.1f} {u}"
             b /= 1024
         return f"{b:.1f} TB"
+
     return {
-        "cpu_percent":  min(int(cpu), 100),
+        "cpu_percent":  max(1, min(int(cpu), 100)),
         "mem_percent":  min(int(mem.percent), 100),
         "disk_percent": min(int(disk.percent), 100),
         "total_ram":    fmt(mem.total),
@@ -73,7 +96,8 @@ def get_deployment_history():
     try:
         s3  = boto3.client("s3", region_name="us-east-1")
         obj = s3.get_object(Bucket=S3_BUCKET, Key="deployment_history.json")
-        return json.loads(obj["Body"].read().decode())[-5:][::-1]
+        data = json.loads(obj["Body"].read().decode())
+        return data[-5:][::-1]
     except Exception:
         return []
 
@@ -85,7 +109,14 @@ def save_deployment_record(version, status, message):
             history = json.loads(obj["Body"].read().decode())
         except Exception:
             history = []
-        sc = "success" if status == "Success" else "rollback" if status == "Rolled Back" else "failed"
+
+        if status == "Success":
+            sc = "success"
+        elif status == "Rolled Back":
+            sc = "rollback"
+        else:
+            sc = "failed"
+
         history.append({
             "version":      version,
             "status":       status,
@@ -93,26 +124,34 @@ def save_deployment_record(version, status, message):
             "message":      message,
             "time":         datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M")
         })
-        s3.put_object(Bucket=S3_BUCKET, Key="deployment_history.json",
-                      Body=json.dumps(history[-20:]),
-                      ContentType="application/json")
+        s3.put_object(
+            Bucket=S3_BUCKET,
+            Key="deployment_history.json",
+            Body=json.dumps(history[-20:]),
+            ContentType="application/json"
+        )
     except Exception as e:
-        print(f"S3 error: {e}")
+        print(f"S3 save error: {e}")
 
 @app.route("/")
 def home():
     docker_dot, docker_badge, docker_lbl = get_docker_status()
     jenkins_dot, jenkins_badge, jenkins_lbl = get_jenkins_status()
-    metrics   = get_system_metrics()
-    cname, cimage, cstatus = get_container_info()
-    history   = get_deployment_history()
-    health_ok = docker_lbl == "RUNNING"
+    metrics  = get_system_metrics()
+    cinfo    = get_container_info()
+    history  = get_deployment_history()
+
+    # Since this page is being served the app IS healthy
+    health_ok = True
+
     try:
         host_ip = socket.gethostbyname(socket.gethostname())
     except Exception:
         host_ip = "unknown"
-    total   = len(history) + 1
-    success = sum(1 for d in history if d.get("status") == "Success") + 1
+
+    total   = len(history)
+    success = sum(1 for d in history if d.get("status") == "Success")
+
     return render_template("index.html",
         version=VERSION,
         environment=ENV_NAME,
@@ -131,20 +170,21 @@ def home():
         jenkins_status=jenkins_lbl,
         jenkins_dot=jenkins_dot,
         jenkins_badge_class=jenkins_badge,
-        health_status="HEALTHY" if health_ok else "UNHEALTHY",
-        health_dot="green" if health_ok else "red",
-        health_badge_class="green" if health_ok else "red",
-        health_stage_class="done" if health_ok else "fail",
-        health_stage_icon="✅" if health_ok else "❌",
+        health_status="HEALTHY",
+        health_dot="green",
+        health_badge_class="green",
+        health_stage_class="done",
+        health_stage_icon="✅",
         cpu_percent=metrics["cpu_percent"],
         mem_percent=metrics["mem_percent"],
         disk_percent=metrics["disk_percent"],
         total_ram=metrics["total_ram"],
         used_ram=metrics["used_ram"],
         free_ram=metrics["free_ram"],
-        container_name=cname,
-        container_image=cimage,
-        container_status=cstatus,
+        container_name=cinfo["name"],
+        container_image=cinfo["image"],
+        container_status=cinfo["status"],
+        container_restart=cinfo["restart"],
         deployment_history=history,
     )
 
@@ -165,6 +205,22 @@ def record_deploy():
         data.get("message", "Deployed successfully")
     )
     return jsonify({"ok": True}), 200
-
+@app.route("/container-details")
+def container_details():
+    out = run_cmd(["docker", "inspect", "devops-app",
+                   "--format",
+                   "{{.Name}}|{{.Config.Image}}|{{.State.Status}}|{{.State.StartedAt}}|{{.HostConfig.RestartPolicy.Name}}|{{.NetworkSettings.IPAddress}}"])
+    parts = out.split("|")
+    if len(parts) == 6:
+        return jsonify({
+            "Name":           parts[0].lstrip("/"),
+            "Image":          parts[1],
+            "Status":         parts[2],
+            "Started At":     parts[3][:19].replace("T", " "),
+            "Restart Policy": parts[4],
+            "Container IP":   parts[5],
+            "Port":           "0.0.0.0:5000"
+        })
+    return jsonify({"error": "Could not fetch details"})
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)

@@ -12,23 +12,24 @@
       shell: cat /tmp/previous_version.txt | tr -d '[:space:]'
       register: prev_version
 
-    - name: Show previous version
+    - name: Show rollback target
       debug:
-        msg: "Rolling back to version: {{ prev_version.stdout }}"
+        msg: "Rolling back to: {{ prev_version.stdout }}"
 
     - name: Stop broken container
-      command: docker stop devops-app
-      ignore_errors: yes
+      shell: docker stop devops-app || true
 
     - name: Remove broken container
-      command: docker rm devops-app
-      ignore_errors: yes
+      shell: docker rm devops-app || true
 
     - name: Redeploy previous version
       shell: |
         docker run -d \
-          --network host \
+          -p 5000:5000 \
+          -v /var/run/docker.sock:/var/run/docker.sock \
           --name devops-app \
           -e APP_VERSION={{ prev_version.stdout }} \
+          -e ENV_NAME=production \
+          -e S3_BUCKET={{ s3_bucket }} \
           devops-app:{{ prev_version.stdout }}
       when: prev_version.stdout != "none" and prev_version.stdout != ""
