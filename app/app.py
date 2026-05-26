@@ -117,7 +117,7 @@ def save_deployment_record(version, status, message):
             ContentType="application/json"
         )
     except Exception as e:
-        print(f"S3 save error: {e}")
+        print(f"S3 bucket save error: {e}")
 
 @app.route("/")
 def home():
