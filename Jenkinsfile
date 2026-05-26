@@ -49,7 +49,7 @@ pipeline {
             steps {
                 sh '''
                     echo "Waiting 20 seconds..."
-                    sleep 20
+                    sleep 30
                     for i in 1 2 3 4 5; do
                         if curl -sf http://$APP_IP:5000/health; then
                             echo "Health check passed!"
