@@ -30,7 +30,7 @@ pipeline {
             steps {
                 sh '''
                     VERSION=v${BUILD_NUMBER}
-                    docker build -t devops-app:$VERSION app/
+                    docker build --no cache -t devops-app:$VERSION app/
                     echo "Built: $VERSION"
                 '''
             }

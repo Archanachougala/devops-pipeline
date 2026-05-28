@@ -183,8 +183,8 @@ def health():
 @app.route("/info")
 def info():
    print("into endpoint")
-    metrics = get_system_metrics()
-    return jsonify({
+   metrics = get_system_metrics()
+   return jsonify({
         "app":         "DevOps Rollback Pipeline",
         "version":     VERSION,
         "environment": ENV_NAME,
