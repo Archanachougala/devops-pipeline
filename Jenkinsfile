@@ -5,7 +5,7 @@ pipeline {
         S3_BUCKET = 'devops-pipeline-deployments-archana'
         APP_IP    = '172.17.0.1'
     }
-
+#done
     stages {
 
         stage('Checkout') {
