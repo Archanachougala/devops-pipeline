@@ -1,2 +1,12 @@
+Docker and Ansible Deployment Notes
+
+- Docker image creation
+- Container deployment
+- Ansible automation
+- Rollback mechanism
+
+
+
+
 This branch includes Dockerfile and Ansible playbooks.
 Used for containerization and automation.
