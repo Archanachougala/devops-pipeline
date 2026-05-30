@@ -1,2 +1,10 @@
+
+Jenkins CI/CD Pipeline Notes
+
+- Automated build using Jenkins
+- Docker image build
+- Ansible deployment
+- Health check validation
+- Automatic rollback support
 This branch contains Jenkins CI/CD pipeline configuration.
 Includes build, test, and deployment stages.
