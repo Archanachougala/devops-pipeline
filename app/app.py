@@ -189,7 +189,7 @@ def container_details():
         })
     except Exception:
         return jsonify({"Name":"devops-app","Image":f"devops-app:{VERSION}",
-                        "Status":"running","Port":"0.0.0.0:5000","Version":VERSION})
+                        "Status":"running","Port":"0.0.0.0:5000","Version":VERSION}
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
