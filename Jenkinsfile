@@ -93,7 +93,7 @@ pipeline {
                             },
                             {
                                 \\"type\\": \\"section\\",
-                                \\"text\\": {\\"type\\": \\"mrkdwn\\", \\"text\\": \\"*Details:*\\\\nDeployment successful. App live at http://32.199.151.13:5000\\"} 
+                                \\"text\\": {\\"type\\": \\"mrkdwn\\", \\"text\\": \\"*Details:*\\\\nDeployment successful. App live at http://44.201.5.197:5000\\"} 
                             },
                             {
                                 \\"type\\": \\"actions\\",
