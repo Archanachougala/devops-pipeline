@@ -5,7 +5,6 @@ pipeline {
         S3_BUCKET = 'devops-pipeline-deployments-archana'
         APP_IP    = '172.17.0.1'
     }
-
     stages {
 
         stage('Checkout') {
@@ -30,7 +29,7 @@ pipeline {
             steps {
                 sh '''
                     VERSION=v${BUILD_NUMBER}
-                    docker build -t devops-app:$VERSION app/
+                    docker build --no-cache -t devops-app:$VERSION app/
                     echo "Built: $VERSION"
                 '''
             }
@@ -74,6 +73,37 @@ pipeline {
                   -H "Content-Type: application/json" \
                   -d "{\"version\":\"$VERSION\",\"status\":\"Success\",\"message\":\"Deployed via Jenkins and Ansible\"}" || true
             '''
+            withCredentials([string(credentialsId: 'SLACK_WEBHOOK_URL', variable: 'SLACK_URL')]) {
+                sh '''
+                    VERSION=v${BUILD_NUMBER}
+                    TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+                    curl -s -X POST -H 'Content-Type: application/json' \
+                    -d "{
+                        \\"blocks\\": [
+                            {
+                                \\"type\\": \\"header\\",
+                                \\"text\\": {\\"type\\": \\"plain_text\\", \\"text\\": \\"✅ Deployment success\\"}
+                            },
+                            {
+                                \\"type\\": \\"section\\",
+                                \\"fields\\": [
+                                    {\\"type\\": \\"mrkdwn\\", \\"text\\": \\"*Version:*\\\\n${VERSION}\\"},
+                                    {\\"type\\": \\"mrkdwn\\", \\"text\\": \\"*Time:*\\\\n${TIMESTAMP}\\"}
+                                ]
+                            },
+                            {
+                                \\"type\\": \\"section\\",
+                                \\"text\\": {\\"type\\": \\"mrkdwn\\", \\"text\\": \\"*Details:*\\\\nDeployment successful. App live at http://44.201.5.197:5000\\"} 
+                            },
+                            {
+                                \\"type\\": \\"actions\\",
+                                \\"elements\\": [{\\"type\\": \\"button\\", \\"text\\": {\\"type\\": \\"plain_text\\", \\"text\\": \\"View Pipeline\\"}, \\"url\\": \\"${BUILD_URL}\\"}]
+                            }
+                        ]
+                    }" \
+                    "$SLACK_URL"
+                '''
+            }
         }
         failure {
             sh '''
@@ -93,6 +123,69 @@ pipeline {
                     echo "No previous version to rollback to"
                 fi
             '''
-        }
+            withCredentials([string(credentialsId: 'SLACK_WEBHOOK_URL', variable: 'SLACK_URL')]) {
+        sh '''
+            VERSION=v${BUILD_NUMBER}
+            TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+            PREVIOUS=$(cat /tmp/previous_version.txt 2>/dev/null | tr -d "[:space:]" || echo "none")
+
+            if [ "$PREVIOUS" != "none" ] && [ -n "$PREVIOUS" ]; then
+                MESSAGE="Deployment failed. Rolled back to $PREVIOUS automatically."
+                ICON="⚠️"
+            else
+                MESSAGE="Deployment failed. No previous version available."
+                ICON="❌"
+            fi
+
+            curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{
+                \\"blocks\\": [
+                    {
+                        \\"type\\": \\"header\\",
+                        \\"text\\": {
+                            \\"type\\": \\"plain_text\\",
+                            \\"text\\": \\"${ICON} Deployment ${VERSION} failed\\"
+                        }
+                    },
+                    {
+                        \\"type\\": \\"section\\",
+                        \\"fields\\": [
+                            {
+                                \\"type\\": \\"mrkdwn\\",
+                                \\"text\\": \\"*Version:*\\\\n${VERSION}\\"
+                            },
+                            {
+                                \\"type\\": \\"mrkdwn\\",
+                                \\"text\\": \\"*Time:*\\\\n${TIMESTAMP}\\"
+                            }
+                        ]
+                    },
+                    {
+                        \\"type\\": \\"section\\",
+                        \\"text\\": {
+                            \\"type\\": \\"mrkdwn\\",
+                            \\"text\\": \\"*Details:*\\\\n${MESSAGE}\\"
+                        }
+                    },
+                    {
+                        \\"type\\": \\"actions\\",
+                        \\"elements\\": [
+                            {
+                                \\"type\\": \\"button\\",
+                                \\"text\\": {
+                                    \\"type\\": \\"plain_text\\",
+                                    \\"text\\": \\"View Pipeline\\"
+                                },
+                                \\"url\\": \\"${BUILD_URL}\\"
+                            }
+                        ]
+                    }
+                ]
+            }" \
+            "$SLACK_URL"
+        '''
     }
 }
+    }
+}
+

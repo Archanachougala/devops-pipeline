@@ -1,2 +1,2 @@
 This branch contains Flask application and dashboard UI.
-Displays project output and monitoring data.
+Displays project output and monitoring data..
